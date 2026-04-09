@@ -1,1 +1,4 @@
 node_modules
+/ui reff/
+/supabase_ab_testing_schema.sql
+/System prompt.md
