@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#131b2e",
+                        "surface-variant": "#dae2fd",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-primary": "#c3c0ff",
+                        "secondary-container": "#b6b4ff",
+                        "surface-container-highest": "#dae2fd",
+                        "primary-fixed": "#e2dfff",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "on-tertiary-container": "#ffd2be",
+                        "inverse-on-surface": "#eef0ff",
+                        "tertiary-fixed-dim": "#ffb695",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "surface-dim": "#d2d9f4",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#e2e7ff",
+                        "on-secondary-container": "#454386",
+                        "outline": "#777587",
+                        "outline-variant": "#c7c4d8",
+                        "on-tertiary-fixed": "#351000",
+                        "surface-tint": "#4d44e3",
+                        "on-error-container": "#93000a",
+                        "secondary": "#58579b",
+                        "tertiary-container": "#a44100",
+                        "surface-container-low": "#f2f3ff",
+                        "on-primary-fixed": "#0f0069",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed": "#e2dfff",
+                        "on-secondary-fixed-variant": "#413f82",
+                        "error": "#ba1a1a",
+                        "primary": "#3525cd",
+                        "surface": "#faf8ff",
+                        "secondary-fixed-dim": "#c3c0ff",
+                        "background": "#faf8ff",
+                        "on-secondary": "#ffffff",
+                        "surface-container": "#eaedff",
+                        "tertiary": "#7e3000",
+                        "surface-bright": "#faf8ff",
+                        "primary-container": "#4f46e5",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "on-secondary-fixed": "#140f54",
+                        "on-surface": "#131b2e",
+                        "on-primary-container": "#dad7ff",
+                        "on-surface-variant": "#464555",
+                        "inverse-surface": "#283044",
+                        "tertiary-fixed": "#ffdbcc"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"],
+                        "mono": ["JetBrains Mono"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+        .mono-text { font-family: 'JetBrains Mono', monospace; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #c7c4d8; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface flex min-h-screen">
+<!-- SideNavBar Component -->
+<aside class="flex flex-col h-full py-6 px-4 bg-slate-50 dark:bg-slate-900 h-screen w-64 border-r-0 font-manrope tracking-tight font-medium fixed left-0 top-0 overflow-y-auto">
+<div class="mb-10 px-2 flex items-center gap-3">
+<div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-container rounded-xl flex items-center justify-center text-white shadow-lg">
+<span class="material-symbols-outlined">architecture</span>
+</div>
+<div>
+<h1 class="text-xl font-bold text-slate-900 dark:text-slate-50">Architect</h1>
+<p class="text-xs text-on-surface-variant opacity-70">Marketing Funnels</p>
+</div>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="science">science</span>
+<span>Tests</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-2xl text-indigo-600 dark:text-indigo-400 font-semibold bg-indigo-50/50 dark:bg-indigo-900/20 transition-colors cursor-pointer active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span>Event Logs</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="mt-auto p-4 bg-surface-container-low rounded-2xl">
+<div class="flex items-center gap-3">
+<img alt="User avatar" class="w-10 h-10 rounded-full object-cover border-2 border-white" data-alt="Professional corporate headshot of a software architect in a clean modern office setting with soft natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCctGbUl02mJ_D5lLTEy5k_DKunN0ZhCK_yIP317K3NEp8KxwbBNL7vFNFK3k80ohwbEygRfjlgqqZOf5M9XfBtyeyjD-ABHQxzB7FGjJmapivkklh-p3p9iKgp43Z2sLbhYt9843SGe8spBFNa3UsGeN9FbfJ-ppsFMYXnAA00Ow17559VXRiNEGXVyc25f_tySOIYJdOW5IIk_sMdfxvFccqsL26CRzX2b4M7WT3Vnql-6f_B9nIns2MrO_X_ZKADLPd64fnIjSw"/>
+<div class="overflow-hidden">
+<p class="text-sm font-bold truncate">Alex Rivera</p>
+<p class="text-xs text-on-surface-variant truncate">Dev Tier</p>
+</div>
+</div>
+</div>
+</aside>
+<main class="ml-64 flex-1 flex flex-col">
+<!-- TopNavBar Component -->
+<header class="flex justify-between items-center h-16 px-8 w-full sticky top-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b-0 font-inter text-sm">
+<div class="flex items-center gap-6 flex-1">
+<span class="text-lg font-semibold text-slate-900 dark:text-slate-50">Precision Layered Dashboard</span>
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-50" data-icon="search">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 focus:ring-2 focus:ring-primary/20 text-xs" placeholder="Search events, paths, or variants..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors cursor-pointer active:scale-95">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="notifications">notifications</span>
+</button>
+<div class="h-8 w-px bg-outline-variant opacity-30"></div>
+<button class="bg-primary-container text-on-primary-container px-4 py-2 rounded-xl font-medium flex items-center gap-2 hover:opacity-90 transition-opacity active:scale-95 cursor-pointer">
+<span class="material-symbols-outlined text-sm" data-icon="terminal">terminal</span>
+<span>API Docs</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area -->
+<div class="p-8 space-y-8">
+<!-- Header Section -->
+<div class="flex justify-between items-end">
+<div>
+<h2 class="text-3xl font-extrabold tracking-tight text-on-surface">Event Logs</h2>
+<p class="text-on-surface-variant mt-1">Real-time stream of incoming telemetry from your deployed funnels.</p>
+</div>
+<div class="flex gap-3">
+<div class="bg-surface-container-lowest p-1 rounded-xl flex gap-1">
+<button class="px-4 py-2 text-xs font-semibold bg-surface-container-high rounded-lg">Live View</button>
+<button class="px-4 py-2 text-xs font-semibold text-on-surface-variant hover:bg-surface-container-low rounded-lg">Historical</button>
+</div>
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest text-on-surface font-semibold rounded-xl text-xs hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="download">download</span>
+                        Export CSV
+                    </button>
+</div>
+</div>
+<!-- Stats Bar (Bento style) -->
+<div class="grid grid-cols-4 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-2xl">
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Events (24h)</p>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-extrabold">128.4k</span>
+<span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">+12.4%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl">
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Avg Latency</p>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-extrabold">42ms</span>
+<span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">Stable</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl">
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Error Rate</p>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-extrabold">0.04%</span>
+<span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">-0.01%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl">
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Active Variants</p>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-extrabold">14</span>
+<span class="text-xs font-bold text-on-surface-variant bg-surface-container-low px-2 py-0.5 rounded-full">Across 4 tests</span>
+</div>
+</div>
+</div>
+<!-- Filters & Table Section -->
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden">
+<!-- Advanced Filters -->
+<div class="p-6 bg-surface-container-low/50 flex flex-wrap items-center gap-4">
+<div class="flex flex-col gap-1.5">
+<label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest px-1">Event Type</label>
+<select class="bg-surface-container-lowest border-none rounded-xl text-xs font-medium focus:ring-2 focus:ring-primary/20 py-2.5 px-4 pr-10">
+<option>All Events</option>
+<option>page_view</option>
+<option>cta_click</option>
+<option>form_submit</option>
+<option>purchase</option>
+</select>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest px-1">Variant</label>
+<select class="bg-surface-container-lowest border-none rounded-xl text-xs font-medium focus:ring-2 focus:ring-primary/20 py-2.5 px-4 pr-10">
+<option>All Variants</option>
+<option>Control</option>
+<option>Variant A (Neon)</option>
+<option>Variant B (Minimal)</option>
+</select>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest px-1">Date Range</label>
+<button class="bg-surface-container-lowest flex items-center gap-2 py-2.5 px-4 rounded-xl text-xs font-medium hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="calendar_today">calendar_today</span>
+                            Last 60 Minutes
+                        </button>
+</div>
+<div class="ml-auto">
+<button class="text-primary font-bold text-xs hover:underline px-4">Clear Filters</button>
+</div>
+</div>
+<!-- Main Logs Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-surface-container-high">
+<th class="px-6 py-4 text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Event Type</th>
+<th class="px-6 py-4 text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Variant</th>
+<th class="px-6 py-4 text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Page Path</th>
+<th class="px-6 py-4 text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Timestamp</th>
+<th class="px-6 py-4 text-[11px] font-bold text-on-surface-variant uppercase tracking-wider text-right">Details</th>
+</tr>
+</thead>
+<tbody class="text-sm">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+<code class="mono-text text-indigo-600 bg-indigo-50/50 px-2 py-0.5 rounded text-xs">page_view</code>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="bg-secondary-container/30 text-on-secondary-container px-3 py-1 rounded-full text-xs font-medium">Variant A (Neon)</span>
+</td>
+<td class="px-6 py-4">
+<code class="mono-text text-on-surface-variant text-xs">/checkout/confirmation</code>
+</td>
+<td class="px-6 py-4">
+<span class="text-on-surface-variant text-xs">14:02:11.452</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined text-lg" data-icon="data_object">data_object</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<code class="mono-text text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded text-xs">cta_click</code>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full text-xs font-medium">Control</span>
+</td>
+<td class="px-6 py-4">
+<code class="mono-text text-on-surface-variant text-xs">/pricing/enterprise</code>
+</td>
+<td class="px-6 py-4">
+<span class="text-on-surface-variant text-xs">14:02:08.119</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined text-lg" data-icon="data_object">data_object</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+<code class="mono-text text-indigo-600 bg-indigo-50/50 px-2 py-0.5 rounded text-xs">page_view</code>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="bg-secondary-container/30 text-on-secondary-container px-3 py-1 rounded-full text-xs font-medium">Variant B (Minimal)</span>
+</td>
+<td class="px-6 py-4">
+<code class="mono-text text-on-surface-variant text-xs">/onboarding/step-2</code>
+</td>
+<td class="px-6 py-4">
+<span class="text-on-surface-variant text-xs">14:01:55.221</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined text-lg" data-icon="data_object">data_object</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-amber-500"></span>
+<code class="mono-text text-amber-600 bg-amber-50 px-2 py-0.5 rounded text-xs">form_submit</code>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="bg-secondary-container/30 text-on-secondary-container px-3 py-1 rounded-full text-xs font-medium">Variant A (Neon)</span>
+</td>
+<td class="px-6 py-4">
+<code class="mono-text text-on-surface-variant text-xs">/contact-us</code>
+</td>
+<td class="px-6 py-4">
+<span class="text-on-surface-variant text-xs">14:01:42.004</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined text-lg" data-icon="data_object">data_object</span>
+</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+<code class="mono-text text-indigo-600 bg-indigo-50/50 px-2 py-0.5 rounded text-xs">page_view</code>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full text-xs font-medium">Control</span>
+</td>
+<td class="px-6 py-4">
+<code class="mono-text text-on-surface-variant text-xs">/blog/ai-trends-2024</code>
+</td>
+<td class="px-6 py-4">
+<span class="text-on-surface-variant text-xs">14:01:38.882</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined text-lg" data-icon="data_object">data_object</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Pagination -->
+<div class="p-6 border-t border-surface-container-high flex items-center justify-between">
+<p class="text-xs text-on-surface-variant">Showing <span class="font-bold text-on-surface">50</span> of 12,842 events</p>
+<div class="flex gap-2">
+<button class="p-2 border border-outline-variant/30 rounded-xl hover:bg-surface-container-low disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center bg-primary text-white text-xs font-bold rounded-xl">1</button>
+<button class="w-8 h-8 flex items-center justify-center text-xs font-medium hover:bg-surface-container-low rounded-xl">2</button>
+<button class="w-8 h-8 flex items-center justify-center text-xs font-medium hover:bg-surface-container-low rounded-xl">3</button>
+<button class="p-2 border border-outline-variant/30 rounded-xl hover:bg-surface-container-low">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Terminal Preview Overlay (Editorial Element) -->
+<div class="grid grid-cols-3 gap-8">
+<div class="col-span-2 bg-inverse-surface rounded-2xl p-6 shadow-2xl relative overflow-hidden group">
+<div class="flex items-center gap-2 mb-4 border-b border-white/10 pb-4">
+<div class="flex gap-1.5">
+<div class="w-3 h-3 rounded-full bg-rose-500/50"></div>
+<div class="w-3 h-3 rounded-full bg-amber-500/50"></div>
+<div class="w-3 h-3 rounded-full bg-emerald-500/50"></div>
+</div>
+<span class="text-[10px] mono-text text-white/40 uppercase tracking-widest ml-4">Schema Inspector</span>
+</div>
+<pre class="mono-text text-xs text-indigo-300 leading-relaxed">{
+  <span class="text-emerald-400">"event"</span>: <span class="text-amber-300">"cta_click"</span>,
+  <span class="text-emerald-400">"variant"</span>: <span class="text-amber-300">"neon_v1"</span>,
+  <span class="text-emerald-400">"properties"</span>: {
+    <span class="text-emerald-400">"element_id"</span>: <span class="text-amber-300">"primary_signup_button"</span>,
+    <span class="text-emerald-400">"screen_resolution"</span>: <span class="text-amber-300">"1920x1080"</span>,
+    <span class="text-emerald-400">"path"</span>: <span class="text-amber-300">"/pricing"</span>
+  },
+  <span class="text-emerald-400">"context"</span>: {
+    <span class="text-emerald-400">"ip"</span>: <span class="text-amber-300">"127.0.0.1"</span>,
+    <span class="text-emerald-400">"agent"</span>: <span class="text-amber-300">"Mozilla/5.0..."</span>
+  }
+}</pre>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface to-transparent opacity-40"></div>
+</div>
+<div class="bg-primary-container rounded-2xl p-8 text-white relative overflow-hidden">
+<div class="relative z-10">
+<h3 class="text-xl font-extrabold mb-4 leading-tight">Automate with Webhooks</h3>
+<p class="text-indigo-100 text-sm mb-6 leading-relaxed">Stream these events directly to your backend, Slack, or CRM in real-time with zero latency.</p>
+<button class="bg-white text-primary px-6 py-3 rounded-xl font-bold text-sm hover:bg-indigo-50 transition-colors shadow-lg active:scale-95">
+                            Connect Webhook
+                        </button>
+</div>
+<!-- Decorative Background Element -->
+<div class="absolute -right-10 -bottom-10 opacity-20 transform rotate-12">
+<span class="material-symbols-outlined text-[160px]" data-icon="hub">hub</span>
+</div>
+</div>
+</div>
+</div>
+<!-- FAB for Quick Actions -->
+<div class="fixed bottom-8 right-8 flex flex-col gap-4">
+<button class="w-14 h-14 bg-gradient-to-tr from-primary to-primary-container text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-105 transition-transform active:scale-90 group relative">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+<span class="absolute right-16 bg-on-background text-white text-xs py-1.5 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">New Webhook</span>
+</button>
+</div>
+</main>
+</body></html>

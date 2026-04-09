@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NAD Headline Test V1 - Architect Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#131b2e",
+                        "surface-variant": "#dae2fd",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-primary": "#c3c0ff",
+                        "secondary-container": "#b6b4ff",
+                        "surface-container-highest": "#dae2fd",
+                        "primary-fixed": "#e2dfff",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "on-tertiary-container": "#ffd2be",
+                        "inverse-on-surface": "#eef0ff",
+                        "tertiary-fixed-dim": "#ffb695",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "surface-dim": "#d2d9f4",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#e2e7ff",
+                        "on-secondary-container": "#454386",
+                        "outline": "#777587",
+                        "outline-variant": "#c7c4d8",
+                        "on-tertiary-fixed": "#351000",
+                        "surface-tint": "#4d44e3",
+                        "on-error-container": "#93000a",
+                        "secondary": "#58579b",
+                        "tertiary-container": "#a44100",
+                        "surface-container-low": "#f2f3ff",
+                        "on-primary-fixed": "#0f0069",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed": "#e2dfff",
+                        "on-secondary-fixed-variant": "#413f82",
+                        "error": "#ba1a1a",
+                        "primary": "#3525cd",
+                        "surface": "#faf8ff",
+                        "secondary-fixed-dim": "#c3c0ff",
+                        "background": "#faf8ff",
+                        "on-secondary": "#ffffff",
+                        "surface-container": "#eaedff",
+                        "tertiary": "#7e3000",
+                        "surface-bright": "#faf8ff",
+                        "primary-container": "#4f46e5",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "on-secondary-fixed": "#140f54",
+                        "on-surface": "#131b2e",
+                        "on-primary-container": "#dad7ff",
+                        "on-surface-variant": "#464555",
+                        "inverse-surface": "#283044",
+                        "tertiary-fixed": "#ffdbcc"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<div class="flex h-screen overflow-hidden">
+<!-- SideNavBar -->
+<aside class="flex flex-col h-full py-6 px-4 bg-slate-50 dark:bg-slate-900 h-screen w-64 border-r-0 font-manrope tracking-tight font-medium">
+<div class="flex items-center gap-3 mb-10 px-2">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">architecture</span>
+</div>
+<div>
+<div class="text-xl font-bold text-slate-900 dark:text-slate-50">Architect</div>
+<div class="text-xs text-on-surface-variant">Marketing Funnels</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<div class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors cursor-pointer text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors cursor-pointer text-indigo-600 dark:text-indigo-400 font-semibold bg-indigo-50/50 dark:bg-indigo-900/20">
+<span class="material-symbols-outlined">science</span>
+<span>Tests</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors cursor-pointer text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined">history</span>
+<span>Event Logs</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors cursor-pointer text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</div>
+</nav>
+<div class="mt-auto pt-6 border-t border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3 px-2">
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden">
+<img alt="User avatar" data-alt="professional headshot of a creative director in a minimalist studio setting with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKiMrxYhWEmdRVsvO5rbuEQ9flH5UYiocMuImqtI_9qtTr0ReO2ri7vzV-mCwb7OvQ569OAU4u9vIlUX23appZAkU73LR62LRPtsATWaPpuHsODYJ6Qu7zOhyyS5X8Rcaw0xbqplJGvVLRBRXRmfqIjNCTmMh5xlX4Wokix0FqOt4XqIVMUZptxrHGPCjR65rxaYvM7AOqiaItGKKlzbVy4fIQJ6-_1hHwF0zIfg0WTjgMoGDeB6imc6e3AuG95Vgx6RvYmARkljM"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-semibold truncate text-on-surface">Alex Rivera</p>
+<p class="text-xs text-on-surface-variant truncate">Lead Analyst</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto relative bg-surface">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center h-16 px-8 w-full sticky top-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b-0 font-inter text-sm">
+<div class="flex items-center gap-6">
+<h2 class="text-lg font-semibold text-slate-900 dark:text-slate-50">Precision Layered Dashboard</h2>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="pl-10 pr-4 py-1.5 bg-surface-container-low border-0 rounded-full focus:ring-2 focus:ring-primary/20 w-64 text-sm" placeholder="Search experiments..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</button>
+<div class="h-8 w-[1px] bg-outline-variant/30"></div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="font-medium">Active Test:</span>
+<span class="text-primary font-semibold">NAD Headline Test V1</span>
+</div>
+</div>
+</header>
+<div class="px-8 py-8 max-w-7xl mx-auto space-y-8">
+<!-- Page Header with Status -->
+<div class="flex justify-between items-end">
+<div>
+<div class="flex items-center gap-3 mb-2">
+<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold tracking-wider flex items-center gap-1.5 uppercase">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Active
+                            </span>
+<span class="text-on-surface-variant text-sm font-medium">Started Jan 12, 2024</span>
+</div>
+<h1 class="text-4xl font-extrabold text-on-surface tracking-tight">NAD Headline Test V1</h1>
+<p class="text-on-surface-variant mt-1 text-lg">Optimizing landing page conversion via hero headline iteration.</p>
+</div>
+<div class="flex gap-3">
+<button class="px-6 py-2.5 rounded-xl bg-surface-container-high text-primary font-semibold hover:opacity-80 transition-opacity active:scale-95">Pause Test</button>
+<button class="px-6 py-2.5 rounded-xl bg-gradient-to-br from-primary to-primary-container text-white font-semibold shadow-xl shadow-primary/20 hover:opacity-90 transition-opacity active:scale-95">Deploy Variant B</button>
+</div>
+</div>
+<!-- Top KPI Cards (Bento Grid Style) -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-transparent hover:border-outline-variant/10 transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+<span class="material-symbols-outlined">group</span>
+</div>
+<span class="text-emerald-500 flex items-center text-xs font-bold bg-emerald-50 px-2 py-1 rounded-lg">
+<span class="material-symbols-outlined text-xs">trending_up</span> 12%
+                            </span>
+</div>
+<div class="text-on-surface-variant text-sm font-medium">Total Visitors</div>
+<div class="text-3xl font-extrabold text-on-surface mt-1">12.4k</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-transparent hover:border-outline-variant/10 transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+<span class="material-symbols-outlined">ads_click</span>
+</div>
+<span class="text-emerald-500 flex items-center text-xs font-bold bg-emerald-50 px-2 py-1 rounded-lg">
+<span class="material-symbols-outlined text-xs">trending_up</span> 8.4%
+                            </span>
+</div>
+<div class="text-on-surface-variant text-sm font-medium">Total Clicks</div>
+<div class="text-3xl font-extrabold text-on-surface mt-1">1.2k</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-transparent hover:border-outline-variant/10 transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+<span class="material-symbols-outlined">conversion_path</span>
+</div>
+<span class="text-emerald-500 flex items-center text-xs font-bold bg-emerald-50 px-2 py-1 rounded-lg">
+<span class="material-symbols-outlined text-xs">trending_up</span> 2.1%
+                            </span>
+</div>
+<div class="text-on-surface-variant text-sm font-medium">Conversion Rate</div>
+<div class="text-3xl font-extrabold text-on-surface mt-1">9.7%</div>
+</div>
+<div class="bg-primary text-white p-6 rounded-2xl shadow-xl shadow-primary/20 relative overflow-hidden group">
+<div class="relative z-10">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+</div>
+<span class="text-white/90 text-xs font-bold bg-white/20 px-2 py-1 rounded-lg backdrop-blur-md">94% CONFIDENCE</span>
+</div>
+<div class="text-white/70 text-sm font-medium">Current Leader</div>
+<div class="text-3xl font-extrabold mt-1">Variant B</div>
+</div>
+<div class="absolute top-0 right-0 p-8 translate-x-4 -translate-y-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[120px]">stars</span>
+</div>
+</div>
+</div>
+<!-- Main Content: Graph & Table -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Graph Section -->
+<div class="lg:col-span-2 space-y-6">
+<div class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm">
+<div class="flex justify-between items-center mb-8">
+<div>
+<h3 class="text-xl font-bold text-on-surface">Conversion Performance</h3>
+<p class="text-sm text-on-surface-variant">Daily conversion rate tracking across all segments.</p>
+</div>
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-slate-400"></span>
+<span class="text-xs font-semibold text-on-surface-variant">A</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-primary"></span>
+<span class="text-xs font-semibold text-on-surface-variant">B</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-purple-400"></span>
+<span class="text-xs font-semibold text-on-surface-variant">C</span>
+</div>
+</div>
+</div>
+<!-- Simplified Visual Representation of a Line Chart -->
+<div class="h-64 w-full relative flex items-end gap-1">
+<!-- Background Grid -->
+<div class="absolute inset-0 flex flex-col justify-between py-1">
+<div class="w-full h-px bg-outline-variant/10"></div>
+<div class="w-full h-px bg-outline-variant/10"></div>
+<div class="w-full h-px bg-outline-variant/10"></div>
+<div class="w-full h-px bg-outline-variant/20"></div>
+</div>
+<!-- Illustrative Chart Lines using SVG -->
+<svg class="absolute inset-0 w-full h-full" preserveaspectratio="none" viewbox="0 0 1000 200">
+<!-- Line A (Control) -->
+<path d="M0,150 Q100,140 200,160 T400,145 T600,155 T800,140 T1000,150" fill="none" stroke="#94a3b8" stroke-linecap="round" stroke-width="3"></path>
+<!-- Line B (Leader) -->
+<path d="M0,150 Q100,110 200,90 T400,60 T600,45 T800,55 T1000,40" fill="none" stroke="#3525cd" stroke-linecap="round" stroke-width="4"></path>
+<!-- Line C -->
+<path d="M0,150 Q100,130 200,140 T400,110 T600,120 T800,95 T1000,105" fill="none" stroke="#a78bfa" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+</div>
+<div class="flex justify-between mt-4 px-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
+<span>Jan 12</span>
+<span>Jan 15</span>
+<span>Jan 18</span>
+<span>Jan 21</span>
+<span>Jan 24</span>
+<span>Today</span>
+</div>
+</div>
+<!-- Variant Comparison Table -->
+<div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden">
+<div class="px-8 py-6 border-b border-surface-container-low flex justify-between items-center">
+<h3 class="text-xl font-bold text-on-surface">Detailed Variant Comparison</h3>
+<button class="text-primary font-semibold text-sm flex items-center gap-1">
+                                    Export CSV <span class="material-symbols-outlined text-sm">download</span>
+</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="text-on-surface-variant text-xs font-bold uppercase tracking-wider bg-surface-container-low/50">
+<th class="px-8 py-4">Variant</th>
+<th class="px-8 py-4">Headline text</th>
+<th class="px-8 py-4">Visitors</th>
+<th class="px-8 py-4">Clicks</th>
+<th class="px-8 py-4">CTR</th>
+<th class="px-8 py-4">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-low">
+<!-- Variant A -->
+<tr class="hover:bg-surface-container-low/20 transition-colors">
+<td class="px-8 py-6 font-bold text-on-surface">A</td>
+<td class="px-8 py-6 text-on-surface-variant italic">"Build faster than ever."</td>
+<td class="px-8 py-6 font-medium">4,120</td>
+<td class="px-8 py-6 font-medium">321</td>
+<td class="px-8 py-6 font-bold">7.8%</td>
+<td class="px-8 py-6">
+<span class="px-2.5 py-1 rounded-lg bg-surface-container-high text-on-surface-variant text-[10px] font-bold uppercase tracking-wide">Control</span>
+</td>
+</tr>
+<!-- Variant B (Leader) -->
+<tr class="bg-indigo-50/30 border-l-4 border-primary">
+<td class="px-8 py-6 font-bold text-primary flex items-center gap-2">
+                                                B <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+</td>
+<td class="px-8 py-6 font-semibold text-on-surface">"The architect of your high-converting funnels."</td>
+<td class="px-8 py-6 font-bold">4,152</td>
+<td class="px-8 py-6 font-bold">514</td>
+<td class="px-8 py-6 font-black text-primary">12.4%</td>
+<td class="px-8 py-6">
+<span class="px-2.5 py-1 rounded-lg bg-primary text-white text-[10px] font-bold uppercase tracking-wide">Leader</span>
+</td>
+</tr>
+<!-- Variant C -->
+<tr class="hover:bg-surface-container-low/20 transition-colors">
+<td class="px-8 py-6 font-bold text-on-surface">C</td>
+<td class="px-8 py-6 text-on-surface-variant italic">"Precision at every layer."</td>
+<td class="px-8 py-6 font-medium">4,128</td>
+<td class="px-8 py-6 font-medium">365</td>
+<td class="px-8 py-6 font-bold">8.8%</td>
+<td class="px-8 py-6">
+<span class="px-2.5 py-1 rounded-lg bg-surface-container-high text-on-surface-variant text-[10px] font-bold uppercase tracking-wide">—</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Sidebar Stats/Info -->
+<div class="space-y-6">
+<!-- Confidence Meter -->
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-transparent">
+<h3 class="text-lg font-bold text-on-surface mb-4">Statistical Significance</h3>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between text-sm mb-2">
+<span class="font-medium text-on-surface-variant">Confidence Level</span>
+<span class="font-bold text-primary">94.2%</span>
+</div>
+<div class="w-full h-3 bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 94.2%"></div>
+</div>
+<p class="text-[11px] text-on-surface-variant mt-2 italic leading-relaxed">Required: 95.0% for conclusive results. Remaining: ~24 hours of traffic.</p>
+</div>
+<div class="p-4 rounded-xl bg-secondary-container/10 border border-secondary-container/20">
+<div class="flex items-center gap-2 text-secondary font-bold text-sm mb-1">
+<span class="material-symbols-outlined text-sm">info</span> Insight
+                                    </div>
+<p class="text-xs text-on-secondary-container font-medium leading-relaxed">
+                                        Variant B's long-form, benefit-driven headline is outperforming short hooks by <span class="font-bold">58%</span>. Mobile users show a 2.4x preference for Variant B.
+                                    </p>
+</div>
+</div>
+</div>
+<!-- Experiment Logs / Sidebar Actions -->
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm">
+<h3 class="text-lg font-bold text-on-surface mb-4">Recent Events</h3>
+<div class="space-y-4">
+<div class="flex gap-3">
+<div class="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0"></div>
+<div>
+<div class="text-sm font-semibold text-on-surface">Statistical Leader Identified</div>
+<div class="text-xs text-on-surface-variant">Variant B surpassed Variant A at 90% confidence.</div>
+<div class="text-[10px] font-bold text-outline uppercase mt-1">2 hours ago</div>
+</div>
+</div>
+<div class="flex gap-3">
+<div class="w-2 h-2 rounded-full bg-outline-variant mt-1.5 shrink-0"></div>
+<div>
+<div class="text-sm font-semibold text-on-surface">Data Refresh</div>
+<div class="text-xs text-on-surface-variant">Aggregated results for Jan 24 sync'd successfully.</div>
+<div class="text-[10px] font-bold text-outline uppercase mt-1">6 hours ago</div>
+</div>
+</div>
+<div class="flex gap-3">
+<div class="w-2 h-2 rounded-full bg-outline-variant mt-1.5 shrink-0"></div>
+<div>
+<div class="text-sm font-semibold text-on-surface">Traffic Peak Detected</div>
+<div class="text-xs text-on-surface-variant">Social campaign launch triggered 300% traffic spike.</div>
+<div class="text-[10px] font-bold text-outline uppercase mt-1">14 hours ago</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-6 py-3 rounded-xl border border-outline-variant/30 text-on-surface-variant font-bold text-xs uppercase tracking-widest hover:bg-surface-container-low transition-colors">
+                                View Full Audit Log
+                            </button>
+</div>
+<!-- Promotion/CTA -->
+<div class="rounded-2xl overflow-hidden relative aspect-square group">
+<img alt="Data visualization abstract" class="w-full h-full object-cover brightness-[0.4] group-hover:scale-105 transition-transform duration-700" data-alt="high-tech data dashboard abstract with glowing blue lines and digital grids over a dark corporate background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBa2Ewv9NcIkFkFmDLESC9k2b8GREhlgqGBvQZLAwb8ImzHaGkQ4fJd2B2X0Wfrk__73HZulQ1OuI_cykSDUD8jRLBOrbXo6f2qRcxZeroE6vYYVlRyOX1twCyJy_LHLWRA25ClHTING55CRfEJ369pw_ZsBVD4FDec0HP5nlukICQYpUQ63kN3XJwfg4F5K33OUFJrzz1WGppRZGx9g8B8fdXZVFbWkzUQ5eJN0gll0jasCakUMNAFZsMXNO5XctJXfsYWVyAZuzs"/>
+<div class="absolute inset-0 p-6 flex flex-col justify-end text-white">
+<h4 class="text-xl font-bold mb-2">Automate Your Testing</h4>
+<p class="text-sm text-white/80 mb-4">Let Architect AI automatically prune losing variants and scale winning ones.</p>
+<button class="w-full py-3 bg-white text-primary font-bold rounded-xl text-sm hover:bg-white/90 transition-colors">Enable Smart-Scaling</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
