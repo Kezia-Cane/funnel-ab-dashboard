@@ -1,4 +1,6 @@
 node_modules
+.next/
+.next-*.log
 /ui reff/
 /supabase_ab_testing_schema.sql
 /System prompt.md
