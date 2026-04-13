@@ -3,7 +3,9 @@
 // ====================
 
 export type TestStatus = 'active' | 'completed' | 'draft' | 'paused'
-export type EventType = 'page_view' | 'cta_click' | 'conversion' | 'purchase'
+export const TRACK_EVENT_TYPES = ['page_view', 'cta_click', 'purchase'] as const
+export type TrackEventType = typeof TRACK_EVENT_TYPES[number]
+export type EventType = TrackEventType
 
 export interface ABTest {
     id: string
@@ -43,12 +45,12 @@ export interface ABEvent {
 // ====================
 
 export interface TrackingPayload {
-    event: EventType
+    event: TrackEventType
     test_key: string
     variant: string // 'A', 'B', 'C'
-    page_url?: string
-    page_path?: string
-    timestamp?: string
+    page_url: string
+    page_path: string
+    timestamp: string
     user_agent?: string
     revenue_value?: number
     metadata?: Record<string, unknown>

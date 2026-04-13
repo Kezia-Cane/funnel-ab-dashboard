@@ -1,7 +1,9 @@
 -- =============================================
 -- A/B Testing Dashboard — Supabase Schema
 -- =============================================
+-- Canonical schema source for this project.
 -- Run this in the Supabase SQL editor to set up the database.
+-- Tracking writes should go through the Next.js API using the service role key.
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -42,13 +44,15 @@ CREATE TABLE IF NOT EXISTS ab_events (
   test_id        UUID NOT NULL REFERENCES ab_tests(id) ON DELETE CASCADE,
   variant_id     UUID NOT NULL REFERENCES ab_variants(id) ON DELETE CASCADE,
   event_type     TEXT NOT NULL
-                 CHECK (event_type IN ('page_view', 'cta_click', 'conversion', 'purchase')),
+                 CHECK (event_type IN ('page_view', 'cta_click', 'purchase')),
   page_url       TEXT,
   page_path      TEXT,
   user_agent     TEXT,
   revenue_value  NUMERIC(10, 2),
   metadata       JSONB,
-  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT ab_events_revenue_value_check
+    CHECK (revenue_value IS NULL OR revenue_value >= 0)
 );
 
 -- =============================================
@@ -78,20 +82,25 @@ CREATE INDEX IF NOT EXISTS idx_ab_sessions_test_id   ON ab_sessions(test_id);
 -- =============================================
 -- Row Level Security (RLS)
 -- =============================================
--- Enable RLS on all tables. For the MVP the API uses the service role key
--- which bypasses RLS, so these are a safety net for direct access.
+-- Enable RLS on all tables.
+-- The API and server-side dashboard code use the service role key and bypass RLS.
+-- Do not grant anon/authenticated write access to these tables.
 
 ALTER TABLE ab_tests    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ab_variants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ab_events   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ab_sessions ENABLE ROW LEVEL SECURITY;
 
--- Allow insert via service role (API route) — deny direct anon writes
--- These policies allow authenticated dashboard users full access.
-CREATE POLICY "Service role access" ON ab_tests    FOR ALL USING (true);
-CREATE POLICY "Service role access" ON ab_variants FOR ALL USING (true);
-CREATE POLICY "Service role access" ON ab_events   FOR ALL USING (true);
-CREATE POLICY "Service role access" ON ab_sessions FOR ALL USING (true);
+GRANT USAGE ON SCHEMA public TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ab_tests TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ab_variants TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ab_events TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ab_sessions TO service_role;
+
+REVOKE ALL ON TABLE ab_tests FROM anon, authenticated;
+REVOKE ALL ON TABLE ab_variants FROM anon, authenticated;
+REVOKE ALL ON TABLE ab_events FROM anon, authenticated;
+REVOKE ALL ON TABLE ab_sessions FROM anon, authenticated;
 
 -- =============================================
 -- Trigger: auto-update updated_at on ab_tests

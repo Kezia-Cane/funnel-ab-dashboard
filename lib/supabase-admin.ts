@@ -4,17 +4,23 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 let supabaseAdmin: SupabaseClient | null = null;
 
-export function getSupabaseAdmin() {
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+function getRequiredServerEnv(
+  name: "SUPABASE_URL" | "SUPABASE_SERVICE_ROLE_KEY"
+): string {
+  const value = process.env[name]?.trim();
 
-  if (!supabaseUrl) {
-    throw new Error("Missing environment variable: SUPABASE_URL");
+  if (!value) {
+    throw new Error(`Missing environment variable: ${name}`);
   }
 
-  if (!supabaseServiceRoleKey) {
-    throw new Error("Missing environment variable: SUPABASE_SERVICE_ROLE_KEY");
-  }
+  return value;
+}
+
+export function getSupabaseAdmin(): SupabaseClient {
+  const supabaseUrl = getRequiredServerEnv("SUPABASE_URL");
+  const supabaseServiceRoleKey = getRequiredServerEnv(
+    "SUPABASE_SERVICE_ROLE_KEY"
+  );
 
   if (!supabaseAdmin) {
     supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {

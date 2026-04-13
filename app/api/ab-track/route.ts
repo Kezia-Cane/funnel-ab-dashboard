@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { getSupabaseAdmin } from "../../../lib/supabase-admin";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { TRACK_EVENT_TYPES, type TrackEventType } from "@/types";
 
 export const runtime = "nodejs";
-
-type TrackEventType = "page_view" | "cta_click" | "purchase";
 
 type TrackPayload = {
   event: TrackEventType;
@@ -19,25 +18,67 @@ type TrackPayload = {
   metadata?: Record<string, unknown>;
 };
 
-const ALLOWED_EVENTS: TrackEventType[] = [
-  "page_view",
-  "cta_click",
-  "purchase",
-];
+const ALLOWED_EVENTS = new Set<TrackEventType>(TRACK_EVENT_TYPES);
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "Content-Type",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+const CORS_ALLOWED_HEADERS = "Content-Type, x-ab-track-secret";
+const CORS_ALLOWED_METHODS = "GET, POST, OPTIONS";
+
+type JsonResponseBody = {
+  success: boolean;
+  message: string;
 };
 
+type TrackingApiConfig = {
+  allowedOrigin: string;
+  apiSecret: string;
+};
+
+function getRequiredEnv(
+  name: "ALLOWED_AB_ORIGIN" | "AB_TRACK_API_SECRET"
+): string {
+  const value = process.env[name]?.trim();
+
+  if (!value) {
+    throw new Error(`Missing environment variable: ${name}`);
+  }
+
+  return value;
+}
+
+function getTrackingApiConfig(): TrackingApiConfig {
+  return {
+    allowedOrigin: getRequiredEnv("ALLOWED_AB_ORIGIN"),
+    apiSecret: getRequiredEnv("AB_TRACK_API_SECRET"),
+  };
+}
+
+function getOptionalAllowedOrigin(): string | undefined {
+  const allowedOrigin = process.env.ALLOWED_AB_ORIGIN?.trim();
+  return allowedOrigin || undefined;
+}
+
+function getCorsHeaders(allowedOrigin?: string) {
+  const headers: Record<string, string> = {
+    "Access-Control-Allow-Headers": CORS_ALLOWED_HEADERS,
+    "Access-Control-Allow-Methods": CORS_ALLOWED_METHODS,
+    Vary: "Origin",
+  };
+
+  if (allowedOrigin) {
+    headers["Access-Control-Allow-Origin"] = allowedOrigin;
+  }
+
+  return headers;
+}
+
 function jsonResponse(
-  body: { success: boolean; message: string },
-  status: number
+  body: JsonResponseBody,
+  status: number,
+  allowedOrigin?: string
 ) {
   return NextResponse.json(body, {
     status,
-    headers: corsHeaders,
+    headers: getCorsHeaders(allowedOrigin),
   });
 }
 
@@ -73,7 +114,7 @@ function parsePayload(body: unknown):
     return { data: null, error: "Missing or invalid required fields" };
   }
 
-  if (!ALLOWED_EVENTS.includes(event as TrackEventType)) {
+  if (!ALLOWED_EVENTS.has(event as TrackEventType)) {
     return { data: null, error: "Invalid event type" };
   }
 
@@ -140,35 +181,97 @@ function parsePayload(body: unknown):
   };
 }
 
+function configErrorResponse(error: unknown) {
+  return jsonResponse(
+    {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Tracking API configuration is invalid",
+    },
+    500,
+    getOptionalAllowedOrigin()
+  );
+}
+
+function originErrorResponse(request: NextRequest, allowedOrigin: string) {
+  const requestOrigin = request.headers.get("origin");
+
+  if (requestOrigin && requestOrigin !== allowedOrigin) {
+    return jsonResponse(
+      {
+        success: false,
+        message: "Origin not allowed",
+      },
+      403,
+      allowedOrigin
+    );
+  }
+
+  return null;
+}
+
 export async function GET() {
   return jsonResponse(
     {
       success: true,
       message: "A/B tracking API is healthy",
     },
-    200
+    200,
+    getOptionalAllowedOrigin()
   );
 }
 
-export async function OPTIONS() {
+export async function OPTIONS(request: NextRequest) {
+  let config: TrackingApiConfig;
+
+  try {
+    config = getTrackingApiConfig();
+  } catch (error) {
+    return configErrorResponse(error);
+  }
+
+  const invalidOriginResponse = originErrorResponse(
+    request,
+    config.allowedOrigin
+  );
+
+  if (invalidOriginResponse) {
+    return invalidOriginResponse;
+  }
+
   return new NextResponse(null, {
     status: 200,
-    headers: corsHeaders,
+    headers: getCorsHeaders(config.allowedOrigin),
   });
 }
 
 export async function POST(request: NextRequest) {
-  let body: unknown;
+  let config: TrackingApiConfig;
 
   try {
-    body = await request.json();
-  } catch {
+    config = getTrackingApiConfig();
+  } catch (error) {
+    return configErrorResponse(error);
+  }
+
+  const invalidOriginResponse = originErrorResponse(request, config.allowedOrigin);
+
+  if (invalidOriginResponse) {
+    return invalidOriginResponse;
+  }
+
+  const requestSecret = request.headers.get("x-ab-track-secret")?.trim();
+
+  if (!requestSecret || requestSecret !== config.apiSecret) {
     return jsonResponse(
       {
         success: false,
-        message: "Invalid JSON payload",
+        message: "Unauthorized",
       },
-      400
+      401,
+      config.allowedOrigin
     );
   }
 
@@ -185,7 +288,23 @@ export async function POST(request: NextRequest) {
             ? error.message
             : "Supabase admin is not configured",
       },
-      500
+      500,
+      config.allowedOrigin
+    );
+  }
+
+  let body: unknown;
+
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse(
+      {
+        success: false,
+        message: "Invalid JSON payload",
+      },
+      400,
+      config.allowedOrigin
     );
   }
 
@@ -197,7 +316,8 @@ export async function POST(request: NextRequest) {
         success: false,
         message: parsed.error,
       },
-      400
+      400,
+      config.allowedOrigin
     );
   }
 
@@ -209,7 +329,8 @@ export async function POST(request: NextRequest) {
         success: false,
         message: "Invalid tracking payload",
       },
-      400
+      400,
+      config.allowedOrigin
     );
   }
 
@@ -225,7 +346,8 @@ export async function POST(request: NextRequest) {
         success: false,
         message: "Failed to resolve test",
       },
-      500
+      500,
+      config.allowedOrigin
     );
   }
 
@@ -235,7 +357,8 @@ export async function POST(request: NextRequest) {
         success: false,
         message: "Test not found",
       },
-      404
+      404,
+      config.allowedOrigin
     );
   }
 
@@ -252,7 +375,8 @@ export async function POST(request: NextRequest) {
         success: false,
         message: "Failed to resolve variant",
       },
-      500
+      500,
+      config.allowedOrigin
     );
   }
 
@@ -262,7 +386,8 @@ export async function POST(request: NextRequest) {
         success: false,
         message: "Variant not found",
       },
-      404
+      404,
+      config.allowedOrigin
     );
   }
 
@@ -284,7 +409,8 @@ export async function POST(request: NextRequest) {
         success: false,
         message: "Failed to store tracking event",
       },
-      500
+      500,
+      config.allowedOrigin
     );
   }
 
@@ -293,6 +419,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: "Tracking event received",
     },
-    200
+    200,
+    config.allowedOrigin
   );
 }

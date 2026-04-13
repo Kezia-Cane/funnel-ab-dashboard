@@ -1,4 +1,6 @@
-import { createServerClient } from './client'
+import 'server-only'
+
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import type { ABTest, ABVariant, ABEvent, TrackingPayload } from '@/types'
 
 // ====================
@@ -6,7 +8,7 @@ import type { ABTest, ABVariant, ABEvent, TrackingPayload } from '@/types'
 // ====================
 
 export async function getTests(): Promise<ABTest[]> {
-    const supabase = createServerClient()
+    const supabase = getSupabaseAdmin()
     const { data, error } = await supabase
         .from('ab_tests')
         .select('*')
@@ -17,7 +19,7 @@ export async function getTests(): Promise<ABTest[]> {
 }
 
 export async function getTestByKey(testKey: string): Promise<ABTest | null> {
-    const supabase = createServerClient()
+    const supabase = getSupabaseAdmin()
     const { data, error } = await supabase
         .from('ab_tests')
         .select('*')
@@ -29,7 +31,7 @@ export async function getTestByKey(testKey: string): Promise<ABTest | null> {
 }
 
 export async function getTestById(id: string): Promise<ABTest | null> {
-    const supabase = createServerClient()
+    const supabase = getSupabaseAdmin()
     const { data, error } = await supabase
         .from('ab_tests')
         .select('*')
@@ -45,7 +47,7 @@ export async function getTestById(id: string): Promise<ABTest | null> {
 // ====================
 
 export async function getVariantsByTestId(testId: string): Promise<ABVariant[]> {
-    const supabase = createServerClient()
+    const supabase = getSupabaseAdmin()
     const { data, error } = await supabase
         .from('ab_variants')
         .select('*')
@@ -57,12 +59,12 @@ export async function getVariantsByTestId(testId: string): Promise<ABVariant[]> 
 }
 
 export async function getVariantByKey(testId: string, variantKey: string): Promise<ABVariant | null> {
-    const supabase = createServerClient()
+    const supabase = getSupabaseAdmin()
     const { data, error } = await supabase
         .from('ab_variants')
         .select('*')
         .eq('test_id', testId)
-        .eq('variant_key', variantKey.toUpperCase())
+        .eq('variant_key', variantKey.trim().toUpperCase())
         .single()
 
     if (error && error.code !== 'PGRST116') throw new Error(`getVariantByKey: ${error.message}`)
@@ -74,7 +76,7 @@ export async function getVariantByKey(testId: string, variantKey: string): Promi
 // ====================
 
 export async function insertEvent(payload: TrackingPayload): Promise<ABEvent> {
-    const supabase = createServerClient()
+    const supabase = getSupabaseAdmin()
 
     // Resolve test by test_key
     const test = await getTestByKey(payload.test_key)
@@ -90,11 +92,12 @@ export async function insertEvent(payload: TrackingPayload): Promise<ABEvent> {
             test_id: test.id,
             variant_id: variant.id,
             event_type: payload.event,
-            page_url: payload.page_url ?? null,
-            page_path: payload.page_path ?? null,
+            page_url: payload.page_url,
+            page_path: payload.page_path,
             user_agent: payload.user_agent ?? null,
             revenue_value: payload.revenue_value ?? null,
             metadata: payload.metadata ?? null,
+            created_at: payload.timestamp,
         })
         .select()
         .single()
@@ -104,7 +107,7 @@ export async function insertEvent(payload: TrackingPayload): Promise<ABEvent> {
 }
 
 export async function getEventsByTestId(testId: string, limit = 50): Promise<ABEvent[]> {
-    const supabase = createServerClient()
+    const supabase = getSupabaseAdmin()
     const { data, error } = await supabase
         .from('ab_events')
         .select('*')
@@ -117,7 +120,7 @@ export async function getEventsByTestId(testId: string, limit = 50): Promise<ABE
 }
 
 export async function getRecentEvents(limit = 50): Promise<ABEvent[]> {
-    const supabase = createServerClient()
+    const supabase = getSupabaseAdmin()
     const { data, error } = await supabase
         .from('ab_events')
         .select('*')
@@ -136,7 +139,7 @@ export async function getRecentEvents(limit = 50): Promise<ABEvent[]> {
 export async function getVariantEventCounts(testId: string): Promise<
     Array<{ variant_id: string; event_type: string; count: number }>
 > {
-    const supabase = createServerClient()
+    const supabase = getSupabaseAdmin()
     const { data, error } = await supabase
         .rpc('get_variant_event_counts', { p_test_id: testId })
 
