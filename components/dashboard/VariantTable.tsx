@@ -26,10 +26,10 @@ export default function VariantTable({ variants, onExportCsv }: VariantTableProp
                             <th className="px-8 py-4">Variant</th>
                             <th className="px-8 py-4">Headline Text</th>
                             <th className="px-8 py-4">Visitors</th>
-                            <th className="px-8 py-4">Clicks</th>
-                            <th className="px-8 py-4">CTR</th>
+                            <th className="px-8 py-4">CTA Clicks</th>
+                            <th className="px-8 py-4">CTA CTR</th>
                             <th className="px-8 py-4">Purchases</th>
-                            <th className="px-8 py-4">Purchase CV</th>
+                            <th className="px-8 py-4">Purchase Rate</th>
                             <th className="px-8 py-4">Status</th>
                         </tr>
                     </thead>
@@ -74,9 +74,14 @@ export default function VariantTable({ variants, onExportCsv }: VariantTableProp
 
                                 {/* CTR */}
                                 <td className="px-8 py-6">
-                                    <span className={`font-bold ${v.is_leader ? 'text-primary text-[15px]' : 'text-on-surface'}`}>
-                                        {v.ctr.toFixed(1)}%
-                                    </span>
+                                    <div>
+                                        <span className={`font-bold ${v.is_leader ? 'text-primary text-[15px]' : 'text-on-surface'}`}>
+                                            {v.ctr.toFixed(1)}%
+                                        </span>
+                                        {v.lift !== undefined && v.lift > 0 && (
+                                            <p className="text-[10px] font-bold text-emerald-600 mt-0.5">+{v.lift.toFixed(1)}% lift</p>
+                                        )}
+                                    </div>
                                 </td>
 
                                 {/* Purchases */}
@@ -86,14 +91,9 @@ export default function VariantTable({ variants, onExportCsv }: VariantTableProp
 
                                 {/* Purchase Conversion Rate */}
                                 <td className="px-8 py-6">
-                                    <div>
-                                        <span className={`font-bold ${v.is_leader ? 'text-primary text-[15px]' : 'text-on-surface'}`}>
-                                            {v.purchase_conversion_rate?.toFixed(2) || '0.00'}%
-                                        </span>
-                                        {v.lift !== undefined && v.lift > 0 && (
-                                            <p className="text-[10px] font-bold text-emerald-600 mt-0.5">+{v.lift.toFixed(1)}% lift</p>
-                                        )}
-                                    </div>
+                                    <span className={`font-bold ${v.is_leader ? 'text-primary text-[15px]' : 'text-on-surface'}`}>
+                                        {v.purchase_conversion_rate?.toFixed(2) || '0.00'}%
+                                    </span>
                                 </td>
 
                                 {/* Status Badge */}

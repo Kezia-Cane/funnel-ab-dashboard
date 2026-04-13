@@ -5,10 +5,21 @@ interface FunnelViewProps {
 }
 
 export default function FunnelView({ variants }: FunnelViewProps) {
+    if (!variants.length) {
+        return (
+            <div className="card p-8">
+                <h3 className="text-xl font-bold text-on-surface font-headline">Funnel Walkthrough (Views → CTA Clicks → Purchases)</h3>
+                <p className="text-sm text-on-surface-variant mt-1">
+                    Live funnel metrics will appear after page views and CTA clicks start flowing into Supabase.
+                </p>
+            </div>
+        )
+    }
+
     return (
         <div className="card overflow-hidden">
             <div className="px-8 py-6 border-b border-surface-container-low">
-                <h3 className="text-xl font-bold text-on-surface font-headline">Funnel Walkthrough (Views → Clicks → Purchases)</h3>
+                <h3 className="text-xl font-bold text-on-surface font-headline">Funnel Walkthrough (Views → CTA Clicks → Purchases)</h3>
                 <p className="text-sm text-on-surface-variant mt-1">Comparing traffic quality across the pipeline.</p>
             </div>
 
@@ -20,6 +31,7 @@ export default function FunnelView({ variants }: FunnelViewProps) {
 
                     const clickThrough = views > 0 ? (clicks / views) * 100 : 0
                     const purchaseThrough = clicks > 0 ? (purchases / clicks) * 100 : 0
+                    const purchaseBarWidth = views > 0 ? Math.min((purchases / views) * 500, 100) : 0
 
                     return (
                         <div
@@ -58,7 +70,7 @@ export default function FunnelView({ variants }: FunnelViewProps) {
                                         <span className="font-semibold text-on-surface">{clicks.toLocaleString()}</span>
                                     </div>
                                     <div className="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
-                                        <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${clickThrough}%` }} />
+                                        <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${Math.min(clickThrough, 100)}%` }} />
                                     </div>
                                 </div>
 
@@ -73,7 +85,7 @@ export default function FunnelView({ variants }: FunnelViewProps) {
                                         <span className="font-bold text-primary">{purchases.toLocaleString()}</span>
                                     </div>
                                     <div className="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
-                                        <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(purchases / views) * 100 * 5}%`, minWidth: purchases > 0 ? '4px' : '0' }} />
+                                        <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${purchaseBarWidth}%`, minWidth: purchases > 0 ? '4px' : '0' }} />
                                     </div>
                                 </div>
                             </div>

@@ -88,9 +88,7 @@ export interface DashboardKPIs {
 
 export interface ChartDataPoint {
     date: string
-    variantA: number
-    variantB: number
-    variantC: number
+    [key: string]: string | number
 }
 
 export interface RecentEvent {

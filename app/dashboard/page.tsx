@@ -8,92 +8,115 @@ import FunnelView from '@/components/dashboard/FunnelView'
 import StatisticalSignificance from '@/components/dashboard/StatisticalSignificance'
 import RecentEvents from '@/components/dashboard/RecentEvents'
 import {
-    SAMPLE_KPIS,
-    SAMPLE_VARIANT_STATS,
-    SAMPLE_RECENT_EVENTS,
-    SAMPLE_TEST,
-} from '@/lib/sample-data'
+    getDashboardKPIs,
+    getDailyCtrChartData,
+    getRecentActivity,
+    getTests,
+    getVariantStats,
+} from '@/lib/supabase/queries'
 
 export const metadata: Metadata = {
     title: 'Dashboard',
 }
 
-export default function DashboardPage() {
-    const kpis = SAMPLE_KPIS
-    const variants = SAMPLE_VARIANT_STATS
-    const events = SAMPLE_RECENT_EVENTS
-    const test = SAMPLE_TEST
+export const dynamic = 'force-dynamic'
+
+const EMPTY_KPIS = {
+    total_visitors: 0,
+    total_clicks: 0,
+    total_purchases: 0,
+    conversion_rate: 0,
+    purchase_conversion_rate: 0,
+    leader_variant: '—',
+    leader_metric: 'ctr' as const,
+    confidence_level: 0,
+}
+
+export default async function DashboardPage() {
+    const tests = await getTests()
+    const test = tests.find((item) => item.status === 'active') ?? tests[0] ?? null
+
+    const [kpis, variants, events, chartData] = test
+        ? await Promise.all([
+            getDashboardKPIs(test.id),
+            getVariantStats(test.id),
+            getRecentActivity(5, test.id),
+            getDailyCtrChartData(test.id),
+        ])
+        : [EMPTY_KPIS, [], [], []]
+
+    const leader = variants.find((variant) => variant.is_leader)
+    const leaderLabel = leader ? `Variant ${leader.variant_key}` : 'Awaiting traffic'
+    const leaderBadge = kpis.confidence_level > 0
+        ? `${kpis.confidence_level.toFixed(1)}% CONFIDENCE`
+        : 'LIVE CTR'
+    const significanceInsight = leader
+        ? `${leaderLabel} currently leads on CTA click-through rate with ${leader.clicks.toLocaleString()} clicks from ${leader.visitors.toLocaleString()} live page views.`
+        : 'Live significance will appear once page views and CTA clicks have accumulated for multiple variants.'
 
     return (
         <DashboardLayout>
             <TopNav
                 title="Precision Layered Dashboard"
-                activeTest={test.name}
+                activeTest={test?.name}
                 rightContent={
                     <div className="flex gap-3">
                         <button className="btn-secondary px-5 py-2 text-sm font-semibold">
-                            Pause Test
+                            {test?.status === 'active' ? 'Pause Test' : 'Review Test'}
                         </button>
                         <button className="bg-gradient-to-br from-primary to-primary-container text-white font-semibold px-5 py-2 rounded-xl text-sm ambient-shadow-primary hover:opacity-90 transition-opacity">
-                            Deploy Variant B
+                            {leader ? `Deploy Variant ${leader.variant_key}` : 'Awaiting Leader'}
                         </button>
                     </div>
                 }
             />
 
             <div className="px-8 py-8 max-w-7xl mx-auto space-y-8">
-                {/* Page Header */}
                 <div className="flex justify-between items-end flex-wrap gap-4">
                     <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <span className="badge-active">
-                                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                                Active
-                            </span>
-                            <span className="text-on-surface-variant text-sm font-medium">
-                                Started {new Date(test.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                            </span>
-                        </div>
+                        {test ? (
+                            <div className="flex items-center gap-3 mb-2">
+                                <span className="badge-active">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                                    {test.status.charAt(0).toUpperCase() + test.status.slice(1)}
+                                </span>
+                                <span className="text-on-surface-variant text-sm font-medium">
+                                    Started {new Date(test.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                </span>
+                            </div>
+                        ) : null}
                         <h1 className="text-4xl font-extrabold text-on-surface tracking-tight font-headline">
-                            {test.name}
+                            {test?.name ?? 'No live tests yet'}
                         </h1>
                         <p className="text-on-surface-variant mt-1 text-lg">
-                            {test.description ?? 'Optimizing landing page conversion via hero headline iteration.'}
+                            {test?.description ?? 'As soon as an A/B test and event stream exist in Supabase, the live dashboard will populate here.'}
                         </p>
                     </div>
                 </div>
 
-                {/* KPI Cards — Bento Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
                     <KpiCard
                         icon="group"
                         iconBg="bg-blue-50"
                         iconColor="text-blue-600"
-                        label="Total Visitors"
-                        value={`${(kpis.total_visitors / 1000).toFixed(1)}k`}
-                        trend="12%"
-                        trendPositive
+                        label="Total Page Views"
+                        value={kpis.total_visitors.toLocaleString()}
                     />
                     <KpiCard
-                        icon="shopping_cart"
-                        iconBg="bg-amber-50"
-                        iconColor="text-amber-600"
-                        label="Total Purchases"
-                        value={`${kpis.total_purchases}`}
-                        trend="15%"
-                        trendPositive
+                        icon="ads_click"
+                        iconBg="bg-emerald-50"
+                        iconColor="text-emerald-600"
+                        label="Total CTA Clicks"
+                        value={kpis.total_clicks.toLocaleString()}
                     />
                     <KpiCard
-                        icon="payments"
+                        icon="insights"
                         iconBg="bg-purple-50"
                         iconColor="text-purple-600"
-                        label="Purchase Conv. Rate"
-                        value={`${kpis.purchase_conversion_rate}%`}
-                        trend="1.2%"
-                        trendPositive
+                        label="CTA Click Rate"
+                        value={`${kpis.conversion_rate.toFixed(1)}%`}
                     />
 
-                    {/* Leader Card */}
                     <div className="relative overflow-hidden rounded-2xl bg-primary text-white p-6 ambient-shadow-primary group">
                         <div className="relative z-10">
                             <div className="flex justify-between items-start mb-4">
@@ -103,35 +126,30 @@ export default function DashboardPage() {
                                     </span>
                                 </div>
                                 <span className="text-white/90 text-[10px] font-bold bg-white/20 px-2 py-1 rounded-lg backdrop-blur-md tracking-wide">
-                                    {kpis.confidence_level}% CONFIDENCE
+                                    {leaderBadge}
                                 </span>
                             </div>
-                            <p className="text-white/70 text-sm font-medium">
-                                {kpis.leader_metric === 'purchase' ? 'Leader by Purchase CV' : 'Temporary Leader by CTR'}
-                            </p>
-                            <p className="text-3xl font-extrabold mt-1 font-headline">Variant {kpis.leader_variant}</p>
+                            <p className="text-white/70 text-sm font-medium">Current Leader by CTR</p>
+                            <p className="text-3xl font-extrabold mt-1 font-headline">{leaderLabel}</p>
                         </div>
-                        {/* Decorative icon */}
                         <div className="absolute top-0 right-0 p-8 translate-x-4 -translate-y-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                             <span className="material-symbols-outlined" style={{ fontSize: '120px' }}>stars</span>
                         </div>
                     </div>
                 </div>
 
-                {/* Main Content: Chart (2/3) + Sidebar (1/3) */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Left: Chart + Table */}
                     <div className="lg:col-span-2 space-y-6">
-                        <ConversionChart />
+                        <ConversionChart data={chartData} />
                         <FunnelView variants={variants} />
                         <VariantTable variants={variants} />
                     </div>
 
-                    {/* Right: Stats Sidebar */}
                     <div className="space-y-6">
                         <StatisticalSignificance
                             confidence={kpis.confidence_level}
-                            leaderVariant={`Variant ${kpis.leader_variant}`}
+                            leaderVariant={leaderLabel}
+                            insight={significanceInsight}
                         />
                         <RecentEvents events={events} />
                     </div>

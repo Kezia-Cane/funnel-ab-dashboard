@@ -7,8 +7,9 @@ interface StatisticalSignificanceProps {
 export default function StatisticalSignificance({
     confidence,
     leaderVariant,
-    insight = "Variant B's long-form, benefit-driven headline is outperforming short hooks by 58%. Mobile users show a 2.4x preference for Variant B.",
+    insight = 'Confidence is estimated from the live page-view and CTA-click data currently stored in Supabase.',
 }: StatisticalSignificanceProps) {
+    const hasComparableData = confidence > 0
     const isConclusive = confidence >= 95
 
     return (
@@ -29,7 +30,9 @@ export default function StatisticalSignificance({
                         />
                     </div>
                     <p className="text-[11px] text-on-surface-variant mt-2 italic leading-relaxed">
-                        {isConclusive
+                        {!hasComparableData
+                            ? 'Confidence will appear once the control and challenger variants both receive enough live traffic.'
+                            : isConclusive
                             ? `Conclusive result! ${leaderVariant} is the winner at ${confidence.toFixed(1)}% confidence.`
                             : `Required: 95.0% for conclusive results. Remaining: ~24 hours of traffic.`}
                     </p>
