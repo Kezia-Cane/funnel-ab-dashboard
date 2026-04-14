@@ -48,8 +48,8 @@ export interface TrackingPayload {
     event: TrackEventType
     test_key: string
     variant: string // 'A', 'B', 'C'
-    page_url: string
-    page_path: string
+    page_url?: string
+    page_path?: string
     timestamp: string
     user_agent?: string
     revenue_value?: number

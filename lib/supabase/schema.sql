@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS ab_events (
   page_url       TEXT,
   page_path      TEXT,
   user_agent     TEXT,
-  revenue_value  NUMERIC(10, 2),
+  revenue_value  NUMERIC,
   metadata       JSONB,
   created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   CONSTRAINT ab_events_revenue_value_check

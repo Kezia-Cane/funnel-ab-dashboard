@@ -1,0 +1,7 @@
+BEGIN;
+
+ALTER TABLE IF EXISTS public.ab_events
+  ADD COLUMN IF NOT EXISTS revenue_value NUMERIC,
+  ADD COLUMN IF NOT EXISTS metadata JSONB;
+
+COMMIT;
