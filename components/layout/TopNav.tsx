@@ -3,6 +3,7 @@
 interface TopNavProps {
     title: string
     activeTest?: string
+    activeTestConnected?: boolean
     searchPlaceholder?: string
     rightContent?: React.ReactNode
 }
@@ -10,6 +11,7 @@ interface TopNavProps {
 export default function TopNav({
     title,
     activeTest = 'NAD Headline Test V1',
+    activeTestConnected = true,
     searchPlaceholder = 'Search experiments...',
     rightContent,
 }: TopNavProps) {
@@ -42,7 +44,9 @@ export default function TopNav({
                 <div className="h-6 w-px bg-outline-variant/30" />
                 <div className="hidden lg:flex items-center gap-1.5 text-sm">
                     <span className="text-on-surface-variant font-medium">Active Test:</span>
-                    <span className="text-primary font-semibold">{activeTest}</span>
+                    <span className={activeTestConnected ? 'text-primary font-semibold' : 'text-on-surface-variant font-semibold'}>
+                        {activeTest}
+                    </span>
                 </div>
             </div>
         </header>
