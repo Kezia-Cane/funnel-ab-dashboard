@@ -8,6 +8,7 @@ import {
     jsonResponse,
     readJsonRequest,
 } from '@/lib/api/tracking-route'
+import { isSecretRequiredForTrackEvent } from '@/lib/api/tracking-policy'
 import { insertEvent } from '@/lib/supabase/queries'
 import { formatValidationErrors, validateTrackingPayload } from '@/lib/validation'
 
@@ -46,6 +47,7 @@ export async function OPTIONS(request: NextRequest) {
 export async function POST(request: NextRequest) {
     const authResult = authorizeTrackingRequest(request, {
         allowedMethods: TRACK_ALLOWED_METHODS,
+        requireSecret: false,
     })
 
     if (authResult.response) {
@@ -74,6 +76,22 @@ export async function POST(request: NextRequest) {
             authResult.config.allowedOrigin,
             TRACK_ALLOWED_METHODS,
         )
+    }
+
+    if (isSecretRequiredForTrackEvent(parsed.payload.event)) {
+        const requestSecret = request.headers.get('x-ab-track-secret')?.trim()
+
+        if (!requestSecret || requestSecret !== authResult.config.apiSecret) {
+            return jsonResponse(
+                {
+                    success: false,
+                    message: 'Unauthorized',
+                },
+                401,
+                authResult.config.allowedOrigin,
+                TRACK_ALLOWED_METHODS,
+            )
+        }
     }
 
     try {

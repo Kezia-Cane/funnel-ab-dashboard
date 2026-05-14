@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { parseAllowedOrigins } from '@/lib/api/tracking-policy'
 
 const CORS_ALLOWED_HEADERS = 'Content-Type, x-ab-track-secret'
 
@@ -8,7 +9,8 @@ export type JsonResponseBody = {
 }
 
 export type TrackingApiConfig = {
-    allowedOrigin: string
+    allowedOrigin?: string
+    allowedOrigins: string[]
     apiSecret: string
 }
 
@@ -27,16 +29,44 @@ function getRequiredEnv(name: 'ALLOWED_AB_ORIGIN' | 'AB_TRACK_API_SECRET'): stri
     return value
 }
 
+function getRequiredAllowedOrigins(): string[] {
+    const rawValue =
+        process.env.ALLOWED_AB_ORIGINS?.trim() ||
+        process.env.ALLOWED_AB_ORIGIN?.trim()
+
+    if (!rawValue) {
+        throw new Error('Missing environment variable: ALLOWED_AB_ORIGIN')
+    }
+
+    const origins = parseAllowedOrigins(rawValue)
+
+    if (!origins.length) {
+        throw new Error('At least one allowed origin is required')
+    }
+
+    return origins
+}
+
 export function getTrackingApiConfig(): TrackingApiConfig {
+    const allowedOrigins = getRequiredAllowedOrigins()
+
     return {
-        allowedOrigin: getRequiredEnv('ALLOWED_AB_ORIGIN'),
+        allowedOrigin: allowedOrigins[0],
+        allowedOrigins,
         apiSecret: getRequiredEnv('AB_TRACK_API_SECRET'),
     }
 }
 
 export function getOptionalAllowedOrigin(): string | undefined {
-    const allowedOrigin = process.env.ALLOWED_AB_ORIGIN?.trim()
-    return allowedOrigin || undefined
+    const rawValue =
+        process.env.ALLOWED_AB_ORIGINS?.trim() ||
+        process.env.ALLOWED_AB_ORIGIN?.trim()
+
+    if (!rawValue) {
+        return undefined
+    }
+
+    return parseAllowedOrigins(rawValue)[0]
 }
 
 export function getCorsHeaders(allowedOrigin?: string, allowedMethods = 'POST'): Record<string, string> {
@@ -94,19 +124,19 @@ export function configErrorResponse(error: unknown, allowedMethods = 'POST') {
 
 export function originErrorResponse(
     request: NextRequest,
-    allowedOrigin: string,
+    allowedOrigins: string[],
     allowedMethods = 'POST',
 ) {
     const requestOrigin = request.headers.get('origin')
 
-    if (requestOrigin && requestOrigin !== allowedOrigin) {
+    if (requestOrigin && !allowedOrigins.includes(requestOrigin)) {
         return jsonResponse(
             {
                 success: false,
                 message: 'Origin not allowed',
             },
             403,
-            allowedOrigin,
+            allowedOrigins[0],
             allowedMethods,
         )
     }
@@ -131,7 +161,7 @@ export function authorizeTrackingRequest(
         }
     }
 
-    const invalidOriginResponse = originErrorResponse(request, config.allowedOrigin, allowedMethods)
+    const invalidOriginResponse = originErrorResponse(request, config.allowedOrigins, allowedMethods)
 
     if (invalidOriginResponse) {
         return {
@@ -140,8 +170,20 @@ export function authorizeTrackingRequest(
         }
     }
 
+    const requestOrigin = request.headers.get('origin')
+    const allowedOrigin =
+        requestOrigin && config.allowedOrigins.includes(requestOrigin)
+            ? requestOrigin
+            : config.allowedOrigins[0]
+
     if (!requireSecret) {
-        return { config, response: null }
+        return {
+            config: {
+                ...config,
+                allowedOrigin,
+            },
+            response: null,
+        }
     }
 
     const requestSecret = request.headers.get('x-ab-track-secret')?.trim()
