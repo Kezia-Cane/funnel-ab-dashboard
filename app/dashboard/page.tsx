@@ -5,7 +5,7 @@ import {
     getDashboardKPIs,
     getDailyCtrChartData,
     getRecentActivity,
-    getTests,
+    getTestsWithAnalytics,
     getVariantStats,
 } from '@/lib/supabase/queries'
 
@@ -16,8 +16,23 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
-    const tests = await getTests()
-    const test = tests.find((item) => item.status === 'active') ?? tests[0] ?? null
+    const tests = await getTestsWithAnalytics()
+    const activeTests = tests.filter((item) => item.status === 'active')
+
+    const test =
+        activeTests.sort((a, b) => {
+            if (b.total_visitors !== a.total_visitors) {
+                return b.total_visitors - a.total_visitors
+            }
+
+            if (b.total_clicks !== a.total_clicks) {
+                return b.total_clicks - a.total_clicks
+            }
+
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        })[0] ??
+        tests[0] ??
+        null
 
     const [kpis, variants, events, chartData] = test
         ? await Promise.all([
