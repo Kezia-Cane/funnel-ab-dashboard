@@ -73,6 +73,7 @@ export function getCorsHeaders(allowedOrigin?: string, allowedMethods = 'POST'):
     const headers: Record<string, string> = {
         'Access-Control-Allow-Headers': CORS_ALLOWED_HEADERS,
         'Access-Control-Allow-Methods': allowedMethods,
+        'Access-Control-Allow-Credentials': 'true',
         Vary: 'Origin',
     }
 
