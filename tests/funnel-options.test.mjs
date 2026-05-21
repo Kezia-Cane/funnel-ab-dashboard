@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { buildSelectableFunnelNames } from '../lib/dashboard/funnel-options.js';
+import {
+  buildSelectableFunnelNames,
+  selectConnectedTest,
+} from '../lib/dashboard/funnel-options.js';
 
 test('buildSelectableFunnelNames returns unique ab_tests names excluding the connected test', () => {
   const funnelNames = buildSelectableFunnelNames(
@@ -56,4 +59,54 @@ test('buildSelectableFunnelNames keeps names when there is no connected test', (
   ]);
 
   assert.deepEqual(funnelNames, ['Snooze Brew Headline Test V1']);
+});
+
+test('buildSelectableFunnelNames excludes blocked names', () => {
+  const funnelNames = buildSelectableFunnelNames(
+    [
+      {
+        id: 'nad-test',
+        name: 'NAD Headline Test V1',
+        test_key: 'nad_headline_test_v1',
+        status: 'active',
+        created_at: '2026-05-16T00:00:00.000Z',
+      },
+      {
+        id: 'jiyu-test',
+        name: 'JiYu Headline Test V1',
+        test_key: 'jiyu_headline_v1',
+        status: 'active',
+        created_at: '2026-05-15T00:00:00.000Z',
+      },
+    ],
+    'JiYu Headline Test V1',
+    ['NAD Headline Test V1'],
+  );
+
+  assert.deepEqual(funnelNames, []);
+});
+
+test('selectConnectedTest prefers JiYu Headline Test V1 over the default sort order', () => {
+  const connectedTest = selectConnectedTest([
+    {
+      id: 'nad-test',
+      name: 'NAD Headline Test V1',
+      test_key: 'nad_headline_test_v1',
+      status: 'active',
+      total_visitors: 1000,
+      total_clicks: 100,
+      created_at: '2026-05-16T00:00:00.000Z',
+    },
+    {
+      id: 'jiyu-test',
+      name: 'JiYu Headline Test V1',
+      test_key: 'jiyu_headline_v1',
+      status: 'active',
+      total_visitors: 100,
+      total_clicks: 10,
+      created_at: '2026-05-15T00:00:00.000Z',
+    },
+  ], 'JiYu Headline Test V1');
+
+  assert.equal(connectedTest?.name, 'JiYu Headline Test V1');
 });
