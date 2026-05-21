@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { resolveDashboardSelection } from '../lib/dashboard/dashboard-state.js';
+import { resolveDashboardSelection } from '../lib/dashboard/dashboard-state.ts';
 
 test('resolveDashboardSelection returns the connected dataset when nothing is selected', () => {
   const state = resolveDashboardSelection({
