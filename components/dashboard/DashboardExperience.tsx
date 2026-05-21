@@ -9,26 +9,21 @@ import VariantTable from '@/components/dashboard/VariantTable'
 import FunnelView from '@/components/dashboard/FunnelView'
 import StatisticalSignificance from '@/components/dashboard/StatisticalSignificance'
 import RecentEvents from '@/components/dashboard/RecentEvents'
+import { resolveDashboardSelection } from '@/lib/dashboard/dashboard-state'
 import type { ABTest, ChartDataPoint, DashboardKPIs, RecentEvent, VariantStats } from '@/types'
 
-type DashboardExperienceProps = {
-    connectedTest: ABTest | null
-    connectedKpis: DashboardKPIs
-    connectedVariants: VariantStats[]
-    connectedEvents: RecentEvent[]
-    connectedChartData: ChartDataPoint[]
-    selectableFunnelNames: string[]
+type DashboardDataset = {
+    test: ABTest | null
+    kpis: DashboardKPIs
+    variants: VariantStats[]
+    events: RecentEvent[]
+    chartData: ChartDataPoint[]
 }
 
-const EMPTY_KPIS: DashboardKPIs = {
-    total_visitors: 0,
-    total_clicks: 0,
-    total_purchases: 0,
-    conversion_rate: 0,
-    purchase_conversion_rate: 0,
-    leader_variant: '—',
-    leader_metric: 'ctr',
-    confidence_level: 0,
+type DashboardExperienceProps = {
+    connectedDataset: DashboardDataset
+    datasetsByName: Record<string, DashboardDataset>
+    selectableFunnelNames: string[]
 }
 
 const SKELETON_SWITCH_DELAY_MS = 550
@@ -57,11 +52,8 @@ function DashboardSkeletonPanel({ heightClass }: { heightClass: string }) {
 }
 
 export default function DashboardExperience({
-    connectedTest,
-    connectedKpis,
-    connectedVariants,
-    connectedEvents,
-    connectedChartData,
+    connectedDataset,
+    datasetsByName,
     selectableFunnelNames,
 }: DashboardExperienceProps) {
     const [selectedFunnel, setSelectedFunnel] = useState('')
@@ -83,42 +75,16 @@ export default function DashboardExperience({
         return () => window.clearTimeout(timeoutId)
     }, [displayedFunnel, selectedFunnel])
 
-    const isDisconnectedSelection = displayedFunnel.length > 0
-
     const selectedState = useMemo(() => {
-        if (!isDisconnectedSelection) {
-            return {
-                test: connectedTest,
-                kpis: connectedKpis,
-                variants: connectedVariants,
-                events: connectedEvents,
-                chartData: connectedChartData,
-                title: connectedTest?.name ?? 'No live tests yet',
-                description: connectedTest?.description ?? 'As soon as an A/B test and event stream exist in Supabase, the live dashboard will populate here.',
-                activeTestLabel: connectedTest?.name ?? 'No active test',
-                activeTestConnected: true,
-            }
-        }
-
-        return {
-            test: null,
-            kpis: EMPTY_KPIS,
-            variants: [],
-            events: [],
-            chartData: [],
-            title: displayedFunnel,
-            description: 'This funnel has not been connected to the shared tracking pipeline yet. Once Vercel and GoHighLevel events are live, this dashboard will populate automatically.',
-            activeTestLabel: 'Not connected',
-            activeTestConnected: false,
-        }
+        return resolveDashboardSelection({
+            selectedTestName: displayedFunnel,
+            connectedDataset,
+            datasetsByName,
+        })
     }, [
-        connectedChartData,
-        connectedEvents,
-        connectedKpis,
-        connectedTest,
-        connectedVariants,
+        connectedDataset,
+        datasetsByName,
         displayedFunnel,
-        isDisconnectedSelection,
     ])
 
     const leader = selectedState.variants.find((variant) => variant.is_leader)

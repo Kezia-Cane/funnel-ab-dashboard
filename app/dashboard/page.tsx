@@ -23,14 +23,36 @@ export default async function DashboardPage() {
     const tests = await getTestsWithAnalytics()
     const test = selectConnectedTest(tests, PREFERRED_CONNECTED_TEST_NAME)
 
-    const [kpis, variants, events, chartData] = test
-        ? await Promise.all([
-            getDashboardKPIs(test.id),
-            getVariantStats(test.id),
-            getRecentActivity(5, test.id),
-            getDailyCtrChartData(test.id),
-        ])
-        : [EMPTY_DASHBOARD_KPIS, [], [], []]
+    const datasets = await Promise.all(
+        tests.map(async (currentTest) => {
+            const [kpis, variants, events, chartData] = await Promise.all([
+                getDashboardKPIs(currentTest.id),
+                getVariantStats(currentTest.id),
+                getRecentActivity(5, currentTest.id),
+                getDailyCtrChartData(currentTest.id),
+            ])
+
+            return {
+                test: currentTest,
+                kpis,
+                variants,
+                events,
+                chartData,
+            }
+        }),
+    )
+
+    const connectedDataset = datasets.find((dataset) => dataset.test.id === test?.id) ?? {
+        test: null,
+        kpis: EMPTY_DASHBOARD_KPIS,
+        variants: [],
+        events: [],
+        chartData: [],
+    }
+
+    const datasetsByName = Object.fromEntries(
+        datasets.map((dataset) => [dataset.test.name, dataset]),
+    )
 
     const selectableFunnelNames = buildSelectableFunnelNames(
         tests,
@@ -40,11 +62,8 @@ export default async function DashboardPage() {
 
     return (
         <DashboardExperience
-            connectedTest={test}
-            connectedKpis={kpis}
-            connectedVariants={variants}
-            connectedEvents={events}
-            connectedChartData={chartData}
+            connectedDataset={connectedDataset}
+            datasetsByName={datasetsByName}
             selectableFunnelNames={selectableFunnelNames}
         />
     )
