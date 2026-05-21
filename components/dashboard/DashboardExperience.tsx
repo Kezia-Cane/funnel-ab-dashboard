@@ -24,6 +24,7 @@ type DashboardExperienceProps = {
     connectedDataset: DashboardDataset
     datasetsByName: Record<string, DashboardDataset>
     selectableFunnelNames: string[]
+    fetchError?: string
 }
 
 const SKELETON_SWITCH_DELAY_MS = 550
@@ -55,6 +56,7 @@ export default function DashboardExperience({
     connectedDataset,
     datasetsByName,
     selectableFunnelNames,
+    fetchError,
 }: DashboardExperienceProps) {
     const [selectedFunnel, setSelectedFunnel] = useState('')
     const [displayedFunnel, setDisplayedFunnel] = useState('')
@@ -139,6 +141,12 @@ export default function DashboardExperience({
             />
 
             <div className="px-8 py-8 max-w-7xl mx-auto space-y-8">
+                {fetchError ? (
+                    <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+                        {fetchError}
+                    </div>
+                ) : null}
+
                 <div className="flex justify-between items-end flex-wrap gap-4">
                     <div>
                         {isSwitchingFunnel ? (

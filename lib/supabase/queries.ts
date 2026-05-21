@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { unstable_noStore as noStore } from 'next/cache'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import type {
     ABEvent,
@@ -25,9 +26,18 @@ type EventQueryOptions = {
     since?: string
 }
 
+type DashboardDataset = {
+    test: ABTest | null
+    kpis: DashboardKPIs
+    variants: VariantStats[]
+    events: RecentEvent[]
+    chartData: ChartDataPoint[]
+}
+
 const PAGE_VIEW_EVENT: EventType = 'page_view'
 const CTA_CLICK_EVENT: EventType = 'cta_click'
 const PURCHASE_EVENT: EventType = 'purchase'
+const SUPABASE_MAX_ROWS_PER_REQUEST = 1_000
 
 const MINUTE_IN_MS = 60_000
 const HOUR_IN_MS = 60 * MINUTE_IN_MS
@@ -182,37 +192,64 @@ function buildDashboardKPIs(variants: VariantStats[]): DashboardKPIs {
     }
 }
 
+function markLiveQuery() {
+    noStore()
+}
+
 async function queryEvents({
     testId,
-    limit = 50,
+    limit,
     since,
 }: EventQueryOptions = {}): Promise<ABEvent[]> {
+    markLiveQuery()
     const supabase = getSupabaseAdmin()
+    const rows: ABEvent[] = []
+    let offset = 0
 
-    let query = supabase
-        .from('ab_events')
-        .select('*')
-        .order('created_at', { ascending: false })
+    while (true) {
+        const remaining = typeof limit === 'number'
+            ? limit - rows.length
+            : SUPABASE_MAX_ROWS_PER_REQUEST
 
-    if (testId) {
-        query = query.eq('test_id', testId)
+        if (typeof limit === 'number' && remaining <= 0) {
+            break
+        }
+
+        const batchSize = typeof limit === 'number'
+            ? Math.min(remaining, SUPABASE_MAX_ROWS_PER_REQUEST)
+            : SUPABASE_MAX_ROWS_PER_REQUEST
+
+        let query = supabase
+            .from('ab_events')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .range(offset, offset + batchSize - 1)
+
+        if (testId) {
+            query = query.eq('test_id', testId)
+        }
+
+        if (since) {
+            query = query.gte('created_at', since)
+        }
+
+        const { data, error } = await query
+
+        if (error) {
+            throw new Error(`queryEvents: ${error.message}`)
+        }
+
+        const batch = data ?? []
+        rows.push(...batch)
+
+        if (batch.length < batchSize) {
+            break
+        }
+
+        offset += batch.length
     }
 
-    if (since) {
-        query = query.gte('created_at', since)
-    }
-
-    if (typeof limit === 'number') {
-        query = query.limit(limit)
-    }
-
-    const { data, error } = await query
-
-    if (error) {
-        throw new Error(`queryEvents: ${error.message}`)
-    }
-
-    return data ?? []
+    return rows
 }
 
 async function buildVariantLookup(testIds: string[]): Promise<Map<string, ABVariant>> {
@@ -231,6 +268,7 @@ async function buildVariantLookup(testIds: string[]): Promise<Map<string, ABVari
 // ====================
 
 export async function getTests(): Promise<ABTest[]> {
+    markLiveQuery()
     const supabase = getSupabaseAdmin()
     const { data, error } = await supabase
         .from('ab_tests')
@@ -242,6 +280,7 @@ export async function getTests(): Promise<ABTest[]> {
 }
 
 export async function getTestByKey(testKey: string): Promise<ABTest | null> {
+    markLiveQuery()
     const supabase = getSupabaseAdmin()
     const { data, error } = await supabase
         .from('ab_tests')
@@ -254,6 +293,7 @@ export async function getTestByKey(testKey: string): Promise<ABTest | null> {
 }
 
 export async function getTestById(id: string): Promise<ABTest | null> {
+    markLiveQuery()
     const supabase = getSupabaseAdmin()
     const { data, error } = await supabase
         .from('ab_tests')
@@ -270,6 +310,7 @@ export async function getTestById(id: string): Promise<ABTest | null> {
 // ====================
 
 export async function getVariantsByTestId(testId: string): Promise<ABVariant[]> {
+    markLiveQuery()
     const supabase = getSupabaseAdmin()
     const { data, error } = await supabase
         .from('ab_variants')
@@ -282,6 +323,7 @@ export async function getVariantsByTestId(testId: string): Promise<ABVariant[]> 
 }
 
 export async function getVariantByKey(testId: string, variantKey: string): Promise<ABVariant | null> {
+    markLiveQuery()
     const supabase = getSupabaseAdmin()
     const { data, error } = await supabase
         .from('ab_variants')
@@ -338,7 +380,7 @@ export async function getRecentEvents(limit = 50): Promise<ABEvent[]> {
 export async function getEventsSince(
     since: string,
     testId?: string,
-    limit = 5000,
+    limit?: number,
 ): Promise<ABEvent[]> {
     return queryEvents({ since, testId, limit })
 }
@@ -348,39 +390,22 @@ export async function getEventsSince(
 // ====================
 
 export async function getVariantEventCounts(testId: string): Promise<VariantEventCount[]> {
-    const supabase = getSupabaseAdmin()
-    const { data, error } = await supabase
-        .rpc('get_variant_event_counts', { p_test_id: testId })
+    markLiveQuery()
+    const events = await queryEvents({ testId })
+    const countsByVariant: Record<string, Record<string, number>> = {}
 
-    if (error) {
-        const events = await getEventsByTestId(testId, 10_000)
-        const countsByVariant: Record<string, Record<string, number>> = {}
-
-        for (const event of events) {
-            if (!countsByVariant[event.variant_id]) {
-                countsByVariant[event.variant_id] = {}
-            }
-
-            countsByVariant[event.variant_id][event.event_type] =
-                (countsByVariant[event.variant_id][event.event_type] ?? 0) + 1
+    for (const event of events) {
+        if (!countsByVariant[event.variant_id]) {
+            countsByVariant[event.variant_id] = {}
         }
 
-        return Object.entries(countsByVariant).flatMap(([variant_id, counts]) =>
-            Object.entries(counts).map(([event_type, count]) => ({ variant_id, event_type, count })),
-        )
+        countsByVariant[event.variant_id][event.event_type] =
+            (countsByVariant[event.variant_id][event.event_type] ?? 0) + 1
     }
 
-    const rows = (data ?? []) as Array<{
-        variant_id: string
-        event_type: string
-        count: number | string
-    }>
-
-    return rows.map((row) => ({
-        variant_id: row.variant_id,
-        event_type: row.event_type,
-        count: Number(row.count ?? 0),
-    }))
+    return Object.entries(countsByVariant).flatMap(([variant_id, counts]) =>
+        Object.entries(counts).map(([event_type, count]) => ({ variant_id, event_type, count })),
+    )
 }
 
 export async function getVariantStats(testId: string): Promise<VariantStats[]> {
@@ -404,7 +429,7 @@ export async function getDailyCtrChartData(testId: string, days = 7): Promise<Ch
             const start = new Date()
             start.setUTCHours(0, 0, 0, 0)
             start.setUTCDate(start.getUTCDate() - Math.max(days - 1, 0))
-            return getEventsSince(start.toISOString(), testId, 10_000)
+            return getEventsSince(start.toISOString(), testId)
         })(),
     ])
 
@@ -562,4 +587,49 @@ export async function getTestsWithAnalytics() {
             }
         }),
     )
+}
+
+export async function getDashboardDatasetByTestId(testId: string): Promise<DashboardDataset> {
+    const test = await getTestById(testId)
+
+    if (!test) {
+        return {
+            test: null,
+            kpis: buildDashboardKPIs([]),
+            variants: [],
+            events: [],
+            chartData: [],
+        }
+    }
+
+    const [kpis, variants, events, chartData] = await Promise.all([
+        getDashboardKPIs(test.id),
+        getVariantStats(test.id),
+        getRecentActivity(5, test.id),
+        getDailyCtrChartData(test.id),
+    ])
+
+    return {
+        test,
+        kpis,
+        variants,
+        events,
+        chartData,
+    }
+}
+
+export async function getDashboardDatasetByTestKey(testKey: string): Promise<DashboardDataset> {
+    const test = await getTestByKey(testKey)
+
+    if (!test) {
+        return {
+            test: null,
+            kpis: buildDashboardKPIs([]),
+            variants: [],
+            events: [],
+            chartData: [],
+        }
+    }
+
+    return getDashboardDatasetByTestId(test.id)
 }

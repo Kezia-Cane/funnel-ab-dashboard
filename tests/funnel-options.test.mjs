@@ -86,7 +86,7 @@ test('buildSelectableFunnelNames excludes blocked names', () => {
   assert.deepEqual(funnelNames, []);
 });
 
-test('selectConnectedTest prefers JiYu Headline Test V1 over the default sort order', () => {
+test('selectConnectedTest prefers the JiYu test key over the default sort order', () => {
   const connectedTest = selectConnectedTest([
     {
       id: 'nad-test',
@@ -99,14 +99,18 @@ test('selectConnectedTest prefers JiYu Headline Test V1 over the default sort or
     },
     {
       id: 'jiyu-test',
-      name: 'JiYu Headline Test V1',
+      name: 'JiYu Headline Dashboard',
       test_key: 'jiyu_headline_v1',
       status: 'active',
       total_visitors: 100,
       total_clicks: 10,
       created_at: '2026-05-15T00:00:00.000Z',
     },
-  ], 'JiYu Headline Test V1');
+  ], {
+    preferredTestKey: 'jiyu_headline_v1',
+    preferredTestName: 'JiYu Headline Test V1',
+  });
 
-  assert.equal(connectedTest?.name, 'JiYu Headline Test V1');
+  assert.equal(connectedTest?.test_key, 'jiyu_headline_v1');
+  assert.equal(connectedTest?.name, 'JiYu Headline Dashboard');
 });
