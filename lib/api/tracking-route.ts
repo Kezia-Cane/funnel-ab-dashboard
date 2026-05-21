@@ -5,7 +5,9 @@ const CORS_ALLOWED_HEADERS = 'Content-Type, x-ab-track-secret'
 
 export type JsonResponseBody = {
     success: boolean
-    message: string
+    message?: string
+    error?: string
+    data?: unknown
 }
 
 export type TrackingApiConfig = {

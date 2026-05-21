@@ -17,13 +17,8 @@ type DashboardExperienceProps = {
     connectedVariants: VariantStats[]
     connectedEvents: RecentEvent[]
     connectedChartData: ChartDataPoint[]
+    selectableFunnelNames: string[]
 }
-
-const OFFICIAL_FUNNELS = [
-    'Snooze Brew™ Magnesium Sleep Aid',
-    'Renewal & Rejuvenation Toner Pads',
-    'LullaBites Natural Sleep Gummies',
-] as const
 
 const EMPTY_KPIS: DashboardKPIs = {
     total_visitors: 0,
@@ -67,6 +62,7 @@ export default function DashboardExperience({
     connectedVariants,
     connectedEvents,
     connectedChartData,
+    selectableFunnelNames,
 }: DashboardExperienceProps) {
     const [selectedFunnel, setSelectedFunnel] = useState('')
     const [displayedFunnel, setDisplayedFunnel] = useState('')
@@ -154,7 +150,7 @@ export default function DashboardExperience({
                             className="h-10 min-w-[16rem] rounded-xl bg-surface-container-low px-4 text-sm font-semibold text-on-surface outline-none transition focus:ring-2 focus:ring-primary/20"
                         >
                             <option value="">Current connected test funnel</option>
-                            {OFFICIAL_FUNNELS.map((funnelName) => (
+                            {selectableFunnelNames.map((funnelName) => (
                                 <option key={funnelName} value={funnelName}>
                                     {funnelName}
                                 </option>

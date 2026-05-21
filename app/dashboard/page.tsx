@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import DashboardExperience from '@/components/dashboard/DashboardExperience'
 import { EMPTY_DASHBOARD_KPIS } from '@/components/dashboard/dashboard-data'
+import { buildSelectableFunnelNames } from '@/lib/dashboard/funnel-options'
 import {
     getDashboardKPIs,
     getDailyCtrChartData,
@@ -43,6 +44,8 @@ export default async function DashboardPage() {
         ])
         : [EMPTY_DASHBOARD_KPIS, [], [], []]
 
+    const selectableFunnelNames = buildSelectableFunnelNames(tests, test?.name)
+
     return (
         <DashboardExperience
             connectedTest={test}
@@ -50,6 +53,7 @@ export default async function DashboardPage() {
             connectedVariants={variants}
             connectedEvents={events}
             connectedChartData={chartData}
+            selectableFunnelNames={selectableFunnelNames}
         />
     )
 }
