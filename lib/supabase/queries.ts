@@ -2,6 +2,7 @@ import 'server-only'
 
 import { unstable_noStore as noStore } from 'next/cache'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import type { DashboardDateRange } from '@/lib/dashboard/date-range'
 import type {
     ABEvent,
     ABTest,
@@ -24,6 +25,7 @@ type EventQueryOptions = {
     testId?: string
     limit?: number
     since?: string
+    dateRange?: DashboardDateRange
 }
 
 type DashboardDataset = {
@@ -200,6 +202,7 @@ async function queryEvents({
     testId,
     limit,
     since,
+    dateRange,
 }: EventQueryOptions = {}): Promise<ABEvent[]> {
     markLiveQuery()
     const supabase = getSupabaseAdmin()
@@ -231,6 +234,12 @@ async function queryEvents({
 
         if (since) {
             query = query.gte('created_at', since)
+        }
+
+        if (dateRange) {
+            query = query
+                .gte('created_at', dateRange.start)
+                .lt('created_at', dateRange.end)
         }
 
         const { data, error } = await query
@@ -369,29 +378,37 @@ export async function insertEvent(payload: TrackingPayload): Promise<ABEvent> {
     return data
 }
 
-export async function getEventsByTestId(testId: string, limit = 50): Promise<ABEvent[]> {
-    return queryEvents({ testId, limit })
+export async function getEventsByTestId(
+    testId: string,
+    limit = 50,
+    dateRange?: DashboardDateRange,
+): Promise<ABEvent[]> {
+    return queryEvents({ testId, limit, dateRange })
 }
 
-export async function getRecentEvents(limit = 50): Promise<ABEvent[]> {
-    return queryEvents({ limit })
+export async function getRecentEvents(limit = 50, dateRange?: DashboardDateRange): Promise<ABEvent[]> {
+    return queryEvents({ limit, dateRange })
 }
 
 export async function getEventsSince(
     since: string,
     testId?: string,
     limit?: number,
+    dateRange?: DashboardDateRange,
 ): Promise<ABEvent[]> {
-    return queryEvents({ since, testId, limit })
+    return queryEvents({ since, testId, limit, dateRange })
 }
 
 // ====================
 // Analytics Aggregation
 // ====================
 
-export async function getVariantEventCounts(testId: string): Promise<VariantEventCount[]> {
+export async function getVariantEventCounts(
+    testId: string,
+    dateRange?: DashboardDateRange,
+): Promise<VariantEventCount[]> {
     markLiveQuery()
-    const events = await queryEvents({ testId })
+    const events = await queryEvents({ testId, dateRange })
     const countsByVariant: Record<string, Record<string, number>> = {}
 
     for (const event of events) {
@@ -408,24 +425,32 @@ export async function getVariantEventCounts(testId: string): Promise<VariantEven
     )
 }
 
-export async function getVariantStats(testId: string): Promise<VariantStats[]> {
+export async function getVariantStats(testId: string, dateRange?: DashboardDateRange): Promise<VariantStats[]> {
     const [variants, counts] = await Promise.all([
         getVariantsByTestId(testId),
-        getVariantEventCounts(testId),
+        getVariantEventCounts(testId, dateRange),
     ])
 
     return buildVariantStats(variants, counts)
 }
 
-export async function getDashboardKPIs(testId: string): Promise<DashboardKPIs> {
-    const variants = await getVariantStats(testId)
+export async function getDashboardKPIs(testId: string, dateRange?: DashboardDateRange): Promise<DashboardKPIs> {
+    const variants = await getVariantStats(testId, dateRange)
     return buildDashboardKPIs(variants)
 }
 
-export async function getDailyCtrChartData(testId: string, days = 7): Promise<ChartDataPoint[]> {
+export async function getDailyCtrChartData(
+    testId: string,
+    days = 7,
+    dateRange?: DashboardDateRange,
+): Promise<ChartDataPoint[]> {
     const [variants, events] = await Promise.all([
         getVariantsByTestId(testId),
         (() => {
+            if (dateRange) {
+                return queryEvents({ testId, dateRange })
+            }
+
             const start = new Date()
             start.setUTCHours(0, 0, 0, 0)
             start.setUTCDate(start.getUTCDate() - Math.max(days - 1, 0))
@@ -437,15 +462,18 @@ export async function getDailyCtrChartData(testId: string, days = 7): Promise<Ch
         return []
     }
 
-    const start = new Date()
+    const chartDays = dateRange ? 1 : days
+    const start = dateRange ? new Date(dateRange.start) : new Date()
     start.setUTCHours(0, 0, 0, 0)
-    start.setUTCDate(start.getUTCDate() - Math.max(days - 1, 0))
+    if (!dateRange) {
+        start.setUTCDate(start.getUTCDate() - Math.max(days - 1, 0))
+    }
 
     const variantKeyById = new Map(variants.map((variant) => [variant.id, variant.variant_key]))
     const eventBuckets = new Map<string, { views: number; clicks: number }>()
     const rows: Array<{ dayKey: string; row: ChartDataPoint }> = []
 
-    for (let index = 0; index < days; index += 1) {
+    for (let index = 0; index < chartDays; index += 1) {
         const currentDay = new Date(start)
         currentDay.setUTCDate(start.getUTCDate() + index)
 
@@ -497,10 +525,14 @@ export async function getDailyCtrChartData(testId: string, days = 7): Promise<Ch
     return rows.map(({ row }) => row)
 }
 
-export async function getRecentActivity(limit = 5, testId?: string): Promise<RecentEvent[]> {
+export async function getRecentActivity(
+    limit = 5,
+    testId?: string,
+    dateRange?: DashboardDateRange,
+): Promise<RecentEvent[]> {
     const events = testId
-        ? await getEventsByTestId(testId, limit)
-        : await getRecentEvents(limit)
+        ? await getEventsByTestId(testId, limit, dateRange)
+        : await getRecentEvents(limit, dateRange)
 
     if (!events.length) {
         return []
@@ -534,8 +566,8 @@ export async function getRecentActivity(limit = 5, testId?: string): Promise<Rec
     })
 }
 
-export async function getRecentEventFeed(limit = 50) {
-    const events = await getRecentEvents(limit)
+export async function getRecentEventFeed(limit = 50, dateRange?: DashboardDateRange) {
+    const events = await getRecentEvents(limit, dateRange)
 
     if (!events.length) {
         return []
@@ -562,14 +594,14 @@ export async function getRecentEventFeed(limit = 50) {
     }))
 }
 
-export async function getTestsWithAnalytics() {
+export async function getTestsWithAnalytics(dateRange?: DashboardDateRange) {
     const tests = await getTests()
 
     return Promise.all(
         tests.map(async (test) => {
             const [variants, counts] = await Promise.all([
                 getVariantsByTestId(test.id),
-                getVariantEventCounts(test.id),
+                getVariantEventCounts(test.id, dateRange),
             ])
             const variantStats = buildVariantStats(variants, counts)
             const kpis = buildDashboardKPIs(variantStats)
@@ -589,7 +621,10 @@ export async function getTestsWithAnalytics() {
     )
 }
 
-export async function getDashboardDatasetByTestId(testId: string): Promise<DashboardDataset> {
+export async function getDashboardDatasetByTestId(
+    testId: string,
+    dateRange?: DashboardDateRange,
+): Promise<DashboardDataset> {
     const test = await getTestById(testId)
 
     if (!test) {
@@ -603,10 +638,10 @@ export async function getDashboardDatasetByTestId(testId: string): Promise<Dashb
     }
 
     const [kpis, variants, events, chartData] = await Promise.all([
-        getDashboardKPIs(test.id),
-        getVariantStats(test.id),
-        getRecentActivity(5, test.id),
-        getDailyCtrChartData(test.id),
+        getDashboardKPIs(test.id, dateRange),
+        getVariantStats(test.id, dateRange),
+        getRecentActivity(5, test.id, dateRange),
+        getDailyCtrChartData(test.id, 7, dateRange),
     ])
 
     return {
@@ -618,7 +653,10 @@ export async function getDashboardDatasetByTestId(testId: string): Promise<Dashb
     }
 }
 
-export async function getDashboardDatasetByTestKey(testKey: string): Promise<DashboardDataset> {
+export async function getDashboardDatasetByTestKey(
+    testKey: string,
+    dateRange?: DashboardDateRange,
+): Promise<DashboardDataset> {
     const test = await getTestByKey(testKey)
 
     if (!test) {
@@ -631,5 +669,5 @@ export async function getDashboardDatasetByTestKey(testKey: string): Promise<Das
         }
     }
 
-    return getDashboardDatasetByTestId(test.id)
+    return getDashboardDatasetByTestId(test.id, dateRange)
 }

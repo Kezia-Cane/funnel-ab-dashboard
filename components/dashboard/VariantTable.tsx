@@ -7,8 +7,8 @@ interface VariantTableProps {
 
 export default function VariantTable({ variants, onExportCsv }: VariantTableProps) {
     return (
-        <div className="card overflow-hidden">
-            <div className="px-8 py-6 flex justify-between items-center border-b border-surface-container-low">
+        <div className="card overflow-hidden w-full">
+            <div className="px-8 py-6 flex justify-between items-center gap-4 flex-wrap border-b border-surface-container-low">
                 <h3 className="text-xl font-bold text-on-surface font-headline">Detailed Variant Comparison</h3>
                 <button
                     onClick={onExportCsv}
@@ -19,8 +19,18 @@ export default function VariantTable({ variants, onExportCsv }: VariantTableProp
                 </button>
             </div>
 
-            <div className="overflow-x-auto">
-                <table className="w-full text-left">
+            <div className="w-full overflow-x-auto scrollbar-thin">
+                <table className="min-w-[980px] w-full text-left table-fixed">
+                    <colgroup>
+                        <col className="w-[104px]" />
+                        <col className="w-[260px]" />
+                        <col className="w-[120px]" />
+                        <col className="w-[128px]" />
+                        <col className="w-[120px]" />
+                        <col className="w-[124px]" />
+                        <col className="w-[144px]" />
+                        <col className="w-[120px]" />
+                    </colgroup>
                     <thead>
                         <tr className="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest bg-surface-container-low/50">
                             <th className="px-8 py-4">Variant</th>
@@ -56,24 +66,24 @@ export default function VariantTable({ variants, onExportCsv }: VariantTableProp
                                 </td>
 
                                 {/* Headline */}
-                                <td className="px-8 py-6 max-w-xs">
-                                    <span className={`text-sm ${v.is_leader ? 'font-semibold text-on-surface' : 'text-on-surface-variant italic'}`}>
+                                <td className="px-8 py-6">
+                                    <span className={`block whitespace-normal break-words leading-6 text-sm ${v.is_leader ? 'font-semibold text-on-surface' : 'text-on-surface-variant italic'}`}>
                                         &ldquo;{v.headline}&rdquo;
                                     </span>
                                 </td>
 
                                 {/* Visitors */}
-                                <td className="px-8 py-6 font-semibold text-on-surface">
+                                <td className="px-8 py-6 font-semibold text-on-surface tabular-nums">
                                     {v.visitors.toLocaleString()}
                                 </td>
 
                                 {/* Clicks */}
-                                <td className="px-8 py-6 font-semibold text-on-surface">
+                                <td className="px-8 py-6 font-semibold text-on-surface tabular-nums">
                                     {v.clicks.toLocaleString()}
                                 </td>
 
                                 {/* CTR */}
-                                <td className="px-8 py-6">
+                                <td className="px-8 py-6 tabular-nums">
                                     <div>
                                         <span className={`font-bold ${v.is_leader ? 'text-primary text-[15px]' : 'text-on-surface'}`}>
                                             {v.ctr.toFixed(1)}%
@@ -85,12 +95,12 @@ export default function VariantTable({ variants, onExportCsv }: VariantTableProp
                                 </td>
 
                                 {/* Purchases */}
-                                <td className="px-8 py-6 font-semibold text-primary">
+                                <td className="px-8 py-6 font-semibold text-primary tabular-nums">
                                     {v.purchases?.toLocaleString() || 0}
                                 </td>
 
                                 {/* Purchase Conversion Rate */}
-                                <td className="px-8 py-6">
+                                <td className="px-8 py-6 tabular-nums">
                                     <span className={`font-bold ${v.is_leader ? 'text-primary text-[15px]' : 'text-on-surface'}`}>
                                         {v.purchase_conversion_rate?.toFixed(2) || '0.00'}%
                                     </span>

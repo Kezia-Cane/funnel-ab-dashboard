@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import DashboardExperience from '@/components/dashboard/DashboardExperience'
 import { EMPTY_DASHBOARD_KPIS } from '@/components/dashboard/dashboard-data'
+import { buildUtcDateRange, getDefaultDashboardDate, isValidDashboardDate } from '@/lib/dashboard/date-range'
 import { buildSelectableFunnelNames, selectConnectedTest } from '@/lib/dashboard/funnel-options'
 import {
     getDashboardDatasetByTestId,
@@ -18,11 +19,24 @@ export const revalidate = 0
 const JIYU_TEST_KEY = 'jiyu_headline_v1'
 const PREFERRED_CONNECTED_TEST_NAME = 'JiYu Headline Test V1'
 const EXCLUDED_DROPDOWN_TEST_NAMES = ['NAD Headline Test V1']
+const DASHBOARD_DEFAULT_TIME_ZONE = 'Asia/Singapore'
 
-export default async function DashboardPage() {
+type DashboardPageProps = {
+    searchParams?: Promise<{
+        date?: string
+    }>
+}
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+    const resolvedSearchParams = await searchParams
+    const selectedDate = isValidDashboardDate(resolvedSearchParams?.date)
+        ? resolvedSearchParams.date
+        : getDefaultDashboardDate(new Date(), DASHBOARD_DEFAULT_TIME_ZONE)
+    const selectedDateRange = buildUtcDateRange(selectedDate)
+
     try {
-        const tests = await getTestsWithAnalytics()
-        const jiyuDataset = await getDashboardDatasetByTestKey(JIYU_TEST_KEY)
+        const tests = await getTestsWithAnalytics(selectedDateRange)
+        const jiyuDataset = await getDashboardDatasetByTestKey(JIYU_TEST_KEY, selectedDateRange)
         const connectedTest = selectConnectedTest(tests, {
             preferredTestKey: JIYU_TEST_KEY,
             preferredTestName: PREFERRED_CONNECTED_TEST_NAME,
@@ -34,7 +48,7 @@ export default async function DashboardPage() {
                     return jiyuDataset
                 }
 
-                return getDashboardDatasetByTestId(currentTest.id)
+                return getDashboardDatasetByTestId(currentTest.id, selectedDateRange)
             }),
         )
 
@@ -65,6 +79,7 @@ export default async function DashboardPage() {
                 connectedDataset={connectedDataset}
                 datasetsByName={datasetsByName}
                 selectableFunnelNames={selectableFunnelNames}
+                selectedDate={selectedDate}
             />
         )
     } catch (error) {
@@ -81,6 +96,7 @@ export default async function DashboardPage() {
                 }}
                 datasetsByName={{}}
                 selectableFunnelNames={[]}
+                selectedDate={selectedDate}
                 fetchError={`Unable to load live JiYu dashboard data from Supabase: ${message}`}
             />
         )

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import DashboardLayout from '@/components/layout/DashboardLayout'
 import TopNav from '@/components/layout/TopNav'
 import KpiCard from '@/components/dashboard/KpiCard'
@@ -24,6 +25,7 @@ type DashboardExperienceProps = {
     connectedDataset: DashboardDataset
     datasetsByName: Record<string, DashboardDataset>
     selectableFunnelNames: string[]
+    selectedDate: string
     fetchError?: string
 }
 
@@ -56,11 +58,22 @@ export default function DashboardExperience({
     connectedDataset,
     datasetsByName,
     selectableFunnelNames,
+    selectedDate,
     fetchError,
 }: DashboardExperienceProps) {
+    const router = useRouter()
+    const pathname = usePathname()
+    const searchParams = useSearchParams()
     const [selectedFunnel, setSelectedFunnel] = useState('')
     const [displayedFunnel, setDisplayedFunnel] = useState('')
     const [isSwitchingFunnel, setIsSwitchingFunnel] = useState(false)
+    const [displayedDate, setDisplayedDate] = useState(selectedDate)
+    const [isSwitchingDate, setIsSwitchingDate] = useState(false)
+
+    useEffect(() => {
+        setDisplayedDate(selectedDate)
+        setIsSwitchingDate(false)
+    }, [selectedDate])
 
     useEffect(() => {
         if (selectedFunnel === displayedFunnel) {
@@ -90,6 +103,17 @@ export default function DashboardExperience({
     ])
 
     const leader = selectedState.variants.find((variant) => variant.is_leader)
+    const isLoadingDashboard = isSwitchingFunnel || isSwitchingDate
+    const hasSelectedDateData = selectedState.kpis.total_visitors > 0
+        || selectedState.kpis.total_clicks > 0
+        || selectedState.kpis.total_purchases > 0
+        || selectedState.events.length > 0
+    const selectedDateLabel = new Date(`${selectedDate}T00:00:00.000Z`).toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+        timeZone: 'UTC',
+    })
     const leaderLabel = leader ? `Variant ${leader.variant_key}` : 'Awaiting traffic'
     const leaderBadge = selectedState.kpis.confidence_level > 0
         ? `${selectedState.kpis.confidence_level.toFixed(1)}% CONFIDENCE`
@@ -100,14 +124,27 @@ export default function DashboardExperience({
             ? 'Live significance will appear once page views and CTA clicks have accumulated for multiple variants.'
             : 'Connect this funnel to Vercel and GoHighLevel tracking to begin collecting comparable traffic data.'
 
+    function handleDateChange(nextDate: string) {
+        if (!nextDate) {
+            return
+        }
+
+        setDisplayedDate(nextDate)
+        setIsSwitchingDate(true)
+
+        const nextParams = new URLSearchParams(searchParams.toString())
+        nextParams.set('date', nextDate)
+        router.replace(`${pathname}?${nextParams.toString()}`, { scroll: false })
+    }
+
     return (
         <DashboardLayout>
             <TopNav
                 title="Precision Layered Dashboard"
-                activeTest={isSwitchingFunnel ? 'Loading...' : selectedState.activeTestLabel}
-                activeTestConnected={isSwitchingFunnel ? false : selectedState.activeTestConnected}
+                activeTest={isLoadingDashboard ? 'Loading...' : selectedState.activeTestLabel}
+                activeTestConnected={isLoadingDashboard ? false : selectedState.activeTestConnected}
                 rightContent={
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 flex-wrap justify-end">
                         <label className="sr-only" htmlFor="funnel-project-select">
                             Select funnel project
                         </label>
@@ -126,13 +163,13 @@ export default function DashboardExperience({
                         </select>
                         <button
                             className="btn-secondary px-5 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
-                            disabled={!selectedState.activeTestConnected || isSwitchingFunnel}
+                            disabled={!selectedState.activeTestConnected || isLoadingDashboard}
                         >
                             {selectedState.test?.status === 'active' ? 'Pause Test' : 'Review Test'}
                         </button>
                         <button
                             className="bg-gradient-to-br from-primary to-primary-container text-white font-semibold px-5 py-2 rounded-xl text-sm ambient-shadow-primary hover:opacity-90 transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
-                            disabled={!selectedState.activeTestConnected || isSwitchingFunnel}
+                            disabled={!selectedState.activeTestConnected || isLoadingDashboard}
                         >
                             {leader ? `Deploy Variant ${leader.variant_key}` : 'Awaiting Leader'}
                         </button>
@@ -149,7 +186,7 @@ export default function DashboardExperience({
 
                 <div className="flex justify-between items-end flex-wrap gap-4">
                     <div>
-                        {isSwitchingFunnel ? (
+                        {isLoadingDashboard ? (
                             <div className="flex items-center gap-3 mb-2">
                                 <div className="h-7 w-28 rounded-full bg-surface-container-high animate-pulse" />
                                 <div className="h-4 w-40 rounded bg-surface-container-high animate-pulse" />
@@ -172,7 +209,7 @@ export default function DashboardExperience({
                                 </span>
                             </div>
                         )}
-                        {isSwitchingFunnel ? (
+                        {isLoadingDashboard ? (
                             <>
                                 <div className="h-12 w-[30rem] max-w-full rounded bg-surface-container-high animate-pulse" />
                                 <div className="h-5 w-[36rem] max-w-full rounded bg-surface-container-high animate-pulse mt-3" />
@@ -188,9 +225,52 @@ export default function DashboardExperience({
                             </>
                         )}
                     </div>
+
+                    <div className="card px-4 py-3 flex items-center gap-3 border border-outline-variant/20">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                            <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>
+                                calendar_today
+                            </span>
+                        </div>
+                        <div>
+                            <label
+                                className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1"
+                                htmlFor="dashboard-date-filter"
+                            >
+                                Dashboard Date
+                            </label>
+                            <input
+                                id="dashboard-date-filter"
+                                type="date"
+                                value={displayedDate}
+                                onChange={(event) => handleDateChange(event.target.value)}
+                                className="h-9 min-w-[10.5rem] rounded-xl bg-surface-container-low px-3 text-sm font-semibold text-on-surface outline-none transition focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
+                                aria-label="Select dashboard date"
+                                disabled={isLoadingDashboard}
+                            />
+                        </div>
+                    </div>
                 </div>
 
-                {isSwitchingFunnel ? (
+                {!isLoadingDashboard && !fetchError && selectedState.activeTestConnected && !hasSelectedDateData ? (
+                    <div className="card px-6 py-5 border border-outline-variant/20">
+                        <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center shrink-0">
+                                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>
+                                    event_busy
+                                </span>
+                            </div>
+                            <div>
+                                <h2 className="text-base font-bold text-on-surface font-headline">No data for {selectedDateLabel}</h2>
+                                <p className="text-sm text-on-surface-variant mt-1">
+                                    This date has no Supabase events for the selected funnel. Metrics are cleared so stale dashboard data is not shown.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                ) : null}
+
+                {isLoadingDashboard ? (
                     <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
                             <DashboardSkeletonCard />
@@ -261,7 +341,6 @@ export default function DashboardExperience({
                             <div className="lg:col-span-2 space-y-6">
                                 <ConversionChart data={selectedState.chartData} />
                                 <FunnelView variants={selectedState.variants} />
-                                <VariantTable variants={selectedState.variants} />
                             </div>
 
                             <div className="space-y-6">
@@ -273,6 +352,7 @@ export default function DashboardExperience({
                                 <RecentEvents events={selectedState.events} />
                             </div>
                         </div>
+                        <VariantTable variants={selectedState.variants} />
                     </>
                 )}
             </div>
