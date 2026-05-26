@@ -26,6 +26,7 @@ type DashboardExperienceProps = {
     datasetsByName: Record<string, DashboardDataset>
     selectableFunnelNames: string[]
     selectedDate: string
+    showOverallData: boolean
     fetchError?: string
 }
 
@@ -59,6 +60,7 @@ export default function DashboardExperience({
     datasetsByName,
     selectableFunnelNames,
     selectedDate,
+    showOverallData,
     fetchError,
 }: DashboardExperienceProps) {
     const router = useRouter()
@@ -69,11 +71,13 @@ export default function DashboardExperience({
     const [isSwitchingFunnel, setIsSwitchingFunnel] = useState(false)
     const [displayedDate, setDisplayedDate] = useState(selectedDate)
     const [isSwitchingDate, setIsSwitchingDate] = useState(false)
+    const [isOverallMode, setIsOverallMode] = useState(showOverallData)
 
     useEffect(() => {
         setDisplayedDate(selectedDate)
         setIsSwitchingDate(false)
-    }, [selectedDate])
+        setIsOverallMode(showOverallData)
+    }, [selectedDate, showOverallData])
 
     useEffect(() => {
         if (selectedFunnel === displayedFunnel) {
@@ -130,10 +134,22 @@ export default function DashboardExperience({
         }
 
         setDisplayedDate(nextDate)
+        setIsOverallMode(false)
         setIsSwitchingDate(true)
 
         const nextParams = new URLSearchParams(searchParams.toString())
         nextParams.set('date', nextDate)
+        nextParams.delete('range')
+        router.replace(`${pathname}?${nextParams.toString()}`, { scroll: false })
+    }
+
+    function handleOverallMode() {
+        setIsOverallMode(true)
+        setIsSwitchingDate(true)
+
+        const nextParams = new URLSearchParams(searchParams.toString())
+        nextParams.set('range', 'all')
+        nextParams.delete('date')
         router.replace(`${pathname}?${nextParams.toString()}`, { scroll: false })
     }
 
@@ -249,10 +265,23 @@ export default function DashboardExperience({
                                 disabled={isLoadingDashboard}
                             />
                         </div>
+                        <button
+                            type="button"
+                            onClick={handleOverallMode}
+                            className={`h-9 rounded-xl px-4 text-sm font-semibold transition ${
+                                isOverallMode
+                                    ? 'bg-primary text-white ambient-shadow-primary'
+                                    : 'bg-surface-container-low text-on-surface hover:bg-surface-container-high'
+                            } disabled:cursor-not-allowed disabled:opacity-60`}
+                            disabled={isLoadingDashboard}
+                            aria-pressed={isOverallMode}
+                        >
+                            Overall
+                        </button>
                     </div>
                 </div>
 
-                {!isLoadingDashboard && !fetchError && selectedState.activeTestConnected && !hasSelectedDateData ? (
+                {!isLoadingDashboard && !fetchError && !isOverallMode && selectedState.activeTestConnected && !hasSelectedDateData ? (
                     <div className="card px-6 py-5 border border-outline-variant/20">
                         <div className="flex items-start gap-3">
                             <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center shrink-0">

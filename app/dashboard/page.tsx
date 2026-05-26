@@ -24,15 +24,17 @@ const DASHBOARD_DEFAULT_TIME_ZONE = 'Asia/Singapore'
 type DashboardPageProps = {
     searchParams?: Promise<{
         date?: string
+        range?: string
     }>
 }
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
     const resolvedSearchParams = await searchParams
+    const showOverallData = resolvedSearchParams?.range === 'all'
     const selectedDate = isValidDashboardDate(resolvedSearchParams?.date)
         ? resolvedSearchParams.date
         : getDefaultDashboardDate(new Date(), DASHBOARD_DEFAULT_TIME_ZONE)
-    const selectedDateRange = buildUtcDateRange(selectedDate)
+    const selectedDateRange = showOverallData ? undefined : buildUtcDateRange(selectedDate)
 
     try {
         const tests = await getTestsWithAnalytics(selectedDateRange)
@@ -80,6 +82,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 datasetsByName={datasetsByName}
                 selectableFunnelNames={selectableFunnelNames}
                 selectedDate={selectedDate}
+                showOverallData={showOverallData}
             />
         )
     } catch (error) {
@@ -97,6 +100,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 datasetsByName={{}}
                 selectableFunnelNames={[]}
                 selectedDate={selectedDate}
+                showOverallData={showOverallData}
                 fetchError={`Unable to load live JiYu dashboard data from Supabase: ${message}`}
             />
         )
