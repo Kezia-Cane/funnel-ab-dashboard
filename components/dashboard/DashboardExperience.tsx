@@ -25,9 +25,20 @@ type DashboardExperienceProps = {
     connectedDataset: DashboardDataset
     datasetsByName: Record<string, DashboardDataset>
     selectableFunnelNames: string[]
+    connectedFunnelName: string
     selectedDate: string
     showOverallData: boolean
     fetchError?: string
+}
+
+const FUNNEL_LABELS: Record<string, string> = {
+    'JiYu Headline Test V1': 'JiYu',
+    'Snooze Brew Headline Test V1': 'Snooze Brew',
+    'LullaBites Headline Test V1': 'LullaBites',
+}
+
+function getFunnelLabel(name: string): string {
+    return FUNNEL_LABELS[name] ?? name
 }
 
 const SKELETON_SWITCH_DELAY_MS = 550
@@ -59,6 +70,7 @@ export default function DashboardExperience({
     connectedDataset,
     datasetsByName,
     selectableFunnelNames,
+    connectedFunnelName,
     selectedDate,
     showOverallData,
     fetchError,
@@ -170,10 +182,10 @@ export default function DashboardExperience({
                             onChange={(event) => setSelectedFunnel(event.target.value)}
                             className="h-10 min-w-[16rem] rounded-xl bg-surface-container-low px-4 text-sm font-semibold text-on-surface outline-none transition focus:ring-2 focus:ring-primary/20"
                         >
-                            <option value="">Current connected test funnel</option>
+                            <option value="">{getFunnelLabel(connectedFunnelName || 'JiYu Headline Test V1')}</option>
                             {selectableFunnelNames.map((funnelName) => (
                                 <option key={funnelName} value={funnelName}>
-                                    {funnelName}
+                                    {getFunnelLabel(funnelName)}
                                 </option>
                             ))}
                         </select>

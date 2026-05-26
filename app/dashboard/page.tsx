@@ -20,6 +20,11 @@ const JIYU_TEST_KEY = 'jiyu_headline_v1'
 const PREFERRED_CONNECTED_TEST_NAME = 'JiYu Headline Test V1'
 const EXCLUDED_DROPDOWN_TEST_NAMES = ['NAD Headline Test V1']
 const DASHBOARD_DEFAULT_TIME_ZONE = 'Asia/Singapore'
+const ALLOWED_DROPDOWN_TEST_NAMES = [
+    'JiYu Headline Test V1',
+    'Snooze Brew Headline Test V1',
+    'LullaBites Headline Test V1',
+]
 
 type DashboardPageProps = {
     searchParams?: Promise<{
@@ -70,17 +75,24 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 .map((dataset) => [dataset.test!.name, dataset]),
         )
 
-        const selectableFunnelNames = buildSelectableFunnelNames(
-            tests,
-            connectedDataset.test?.name ?? connectedTest?.name,
-            EXCLUDED_DROPDOWN_TEST_NAMES,
+        const connectedFunnelName = connectedDataset.test?.name ?? connectedTest?.name ?? ''
+        const selectableFunnelNameSet = new Set(
+            buildSelectableFunnelNames(
+                tests,
+                connectedFunnelName,
+                EXCLUDED_DROPDOWN_TEST_NAMES,
+            ),
         )
+        const selectableFunnelNames = ALLOWED_DROPDOWN_TEST_NAMES.filter((name) => {
+            return name !== connectedFunnelName && selectableFunnelNameSet.has(name)
+        })
 
         return (
             <DashboardExperience
                 connectedDataset={connectedDataset}
                 datasetsByName={datasetsByName}
                 selectableFunnelNames={selectableFunnelNames}
+                connectedFunnelName={connectedFunnelName}
                 selectedDate={selectedDate}
                 showOverallData={showOverallData}
             />
@@ -99,6 +111,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 }}
                 datasetsByName={{}}
                 selectableFunnelNames={[]}
+                connectedFunnelName=""
                 selectedDate={selectedDate}
                 showOverallData={showOverallData}
                 fetchError={`Unable to load live JiYu dashboard data from Supabase: ${message}`}
